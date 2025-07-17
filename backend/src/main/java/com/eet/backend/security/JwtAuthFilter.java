@@ -29,6 +29,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         final String jwt;
         final String userEmail;
 
+        // Si es una ruta pública, continuar sin procesar JWT
+        if (request.getServletPath().startsWith("/auth/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             System.out.println("[JWT FILTER] No Authorization header present or not Bearer");
             filterChain.doFilter(request, response);
@@ -55,5 +61,4 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         filterChain.doFilter(request, response);
     }
-
 }
