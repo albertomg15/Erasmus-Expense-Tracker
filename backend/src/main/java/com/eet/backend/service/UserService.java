@@ -67,4 +67,18 @@ public class UserService {
     }
 
 
+// ...
+
+    public void changePassword(User user, String currentPassword, String newPassword) {
+        if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+            throw new RuntimeException("La contraseña actual no es correcta.");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
 }

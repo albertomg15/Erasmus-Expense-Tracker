@@ -17,11 +17,21 @@ export const getTransactionById = async (id) => {
 
 export const createTransaction = async (transaction) => {
   const res = await fetch(`${API_BASE_URL}/api/transactions`, {
-    method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(transaction),
-  });
-  return res.json();
+  method: "POST",
+  headers: {
+    ...getAuthHeaders(),
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify(transaction),
+});
+
+if (!res.ok) {
+  const text = await res.text();
+  throw new Error(`Failed to create transaction: ${res.status} - ${text}`);
+}
+
+return res.json(); // solo si hay body
+
 };
 
 export const deleteTransaction = async (id) => {
@@ -30,3 +40,37 @@ export const deleteTransaction = async (id) => {
     headers: getAuthHeaders(),
   });
 };
+
+// Nuevo endpoint unificado
+export const getDashboardData = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/transactions/dashboard`, {
+    headers: getAuthHeaders(),
+  });
+
+  if (!res.ok) {
+    const errorText = await res.text();
+    throw new Error(`Failed to fetch dashboard data: ${res.status} - ${errorText}`);
+  }
+
+  return res.json();
+};
+
+export const createRecurringTransaction = async (transaction) => {
+  const res = await fetch(`${API_BASE_URL}/api/recurring-transactions`, {
+    method: "POST",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transaction),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to create recurring transaction: ${res.status} - ${text}`);
+  }
+
+  return res.json();
+};
+
+

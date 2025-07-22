@@ -9,8 +9,10 @@ import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class DashboardSummaryDto {
-    private BigDecimal totalBalance;
+public class DashboardDto {
+    private BigDecimal balance;
     private BigDecimal currentMonthExpenses;
+    private BigDecimal maxSpending;
+    private BigDecimal availableBudget;
     private List<Transaction> recentTransactions;
 }

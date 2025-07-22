@@ -1,5 +1,6 @@
 package com.eet.backend.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -22,9 +23,9 @@ public class Budget {
     @Column(name = "budget_id", updatable = false, nullable = false)
     private UUID budgetId;
 
-    private int month;
+    private Integer month;
 
-    private int year;
+    private Integer year;
 
     @Column(name = "max_spending", nullable = false, precision = 19, scale = 4)
     private BigDecimal maxSpending;
@@ -34,6 +35,7 @@ public class Budget {
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 }
 

@@ -9,7 +9,7 @@ export default function Register() {
   const [repeatPassword, setRepeatPassword] = useState("");
   const [preferredCurrency, setPreferredCurrency] = useState("EUR");
   const [language, setLanguage] = useState("en");
-  //const [error, setError] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

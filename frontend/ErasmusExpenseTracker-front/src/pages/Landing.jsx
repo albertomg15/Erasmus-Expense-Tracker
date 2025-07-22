@@ -12,13 +12,13 @@ export default function Landing() {
           to="/login"
           className="bg-[#0056B3] text-white px-8 py-4 rounded-xl text-lg hover:bg-blue-700 transition"
         >
-          Iniciar sesión
+          Log in
         </Link>
         <Link
           to="/register"
           className="bg-white text-[#0056B3] px-8 py-4 rounded-xl text-lg border border-[#0056B3] hover:bg-[#f0f7ff] transition"
         >
-          Registrarse
+          Sign up
         </Link>
       </div>
     </div>
