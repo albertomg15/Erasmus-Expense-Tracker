@@ -56,4 +56,17 @@ public class RecurringTransactionController {
         recurringTransactionService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<RecurringTransaction> updateRecurringTransaction(@PathVariable UUID id,
+                                                                           @RequestBody RecurringTransaction updatedTransaction,
+                                                                           @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return recurringTransactionService.update(id, updatedTransaction, user)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 }

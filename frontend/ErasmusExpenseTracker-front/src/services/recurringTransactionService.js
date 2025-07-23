@@ -25,8 +25,32 @@ export const createRecurringTransaction = async (transaction) => {
 };
 
 export const deleteRecurringTransaction = async (id) => {
-  return fetch(`${API_BASE_URL}/api/recurring-transactions/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/api/recurring-transactions/${id}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to delete recurring transaction: ${res.status} - ${text}`);
+  }
+};
+
+
+export const updateRecurringTransaction = async (id, transaction) => {
+  const res = await fetch(`${API_BASE_URL}/api/recurring-transactions/${id}`, {
+    method: "PUT",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transaction),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update recurring transaction: ${res.status} - ${text}`);
+  }
+
+  return res.json();
 };

@@ -35,11 +35,17 @@ return res.json(); // solo si hay body
 };
 
 export const deleteTransaction = async (id) => {
-  return fetch(`${API_BASE_URL}/api/transactions/${id}`, {
+  const res = await fetch(`${API_BASE_URL}/api/transactions/${id}`, {
     method: "DELETE",
     headers: getAuthHeaders(),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to delete transaction: ${res.status} - ${text}`);
+  }
 };
+
 
 // Nuevo endpoint unificado
 export const getDashboardData = async () => {
@@ -72,5 +78,24 @@ export const createRecurringTransaction = async (transaction) => {
 
   return res.json();
 };
+
+export const updateTransaction = async (id, transaction) => {
+  const res = await fetch(`${API_BASE_URL}/api/transactions/${id}`, {
+    method: "PUT",
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(transaction),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to update transaction: ${res.status} - ${text}`);
+  }
+
+  return res.json();
+};
+
 
 

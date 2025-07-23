@@ -3,6 +3,7 @@ package com.eet.backend.service;
 import com.eet.backend.model.RecurrencePattern;
 import com.eet.backend.model.RecurringTransaction;
 import com.eet.backend.model.Transaction;
+import com.eet.backend.model.User;
 import com.eet.backend.repository.RecurringTransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -84,5 +85,28 @@ public class RecurringTransactionService {
             case MONTHLY -> current.plusMonths(1);
             case YEARLY -> current.plusYears(1);
         };
+    }
+
+    public Optional<RecurringTransaction> update(UUID id, RecurringTransaction updated, User user) {
+        return recurringTransactionRepository.findById(id)
+                .filter(tx -> tx.getUser().getUserId().equals(user.getUserId()))
+                .map(existing -> {
+                    existing.setAmount(updated.getAmount());
+                    existing.setCurrency(updated.getCurrency());
+                    existing.setDate(updated.getDate());
+                    existing.setDescription(updated.getDescription());
+                    existing.setType(updated.getType());
+                    existing.setCategory(updated.getCategory());
+                    existing.setTrip(updated.getTrip());
+
+                    // Campos específicos de recurrentes
+                    existing.setRecurrencePattern(updated.getRecurrencePattern());
+                    existing.setNextExecution(updated.getNextExecution());
+                    existing.setRecurrenceEndDate(updated.getRecurrenceEndDate());
+                    existing.setMaxOccurrences(updated.getMaxOccurrences());
+                    existing.setActive(updated.isActive());
+
+                    return recurringTransactionRepository.save(existing);
+                });
     }
 }

@@ -28,4 +28,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user = :user AND t.type = com.eet.backend.model.TransactionType.EXPENSE AND t.date BETWEEN :start AND :end")
     Optional<BigDecimal> sumExpensesInDateRange(@Param("user") User user, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
+    boolean existsByCategoryCategoryId(UUID categoryId);
 }

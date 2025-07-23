@@ -12,5 +12,7 @@ import java.util.UUID;
 public class CategoryDto {
     private UUID categoryId;
     private String name;
+    private String emoji;
+    private boolean isDefault;
 }
 

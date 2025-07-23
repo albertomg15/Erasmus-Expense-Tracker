@@ -4,6 +4,9 @@ import { getAllCategoriesByUserId } from "../services/categoryService";
 import { formatCurrency } from "../utils/formatters";
 import { useAuth } from "../context/AuthContext";
 import { parseJwt } from "../utils/tokenUtils";
+import { deleteTransaction } from "../services/transactionService";
+import { deleteRecurringTransaction } from "../services/recurringTransactionService";
+
 
 const getMonthLabel = (dateStr) => {
   const date = new Date(dateStr);
@@ -133,13 +136,23 @@ export default function TransactionsPage() {
           {filtered.map((tx) => {
             const isIncome = tx.type === "INCOME";
             const isRecurring = !!tx.recurrencePattern;
-            const amountFormatted = isRecurring
-              ? `Next charge: ${new Date(tx.nextExecution).toLocaleDateString()}`
-              : `${isIncome ? "+" : "-"}${formatCurrency(tx.amount)}`;
-            const amountClass = isRecurring ? "text-blue-600" : isIncome ? "text-green-600" : "text-red-600";
-
-            const categoryName = tx.category?.name || "Uncategorized";
+            const categoryName = tx.category?.emoji
+              ? `${tx.category.emoji} ${tx.category.name}`
+              : tx.category?.name || "Uncategorized";
             const dateFormatted = new Date(tx.date).toLocaleDateString();
+
+            const amountFormatted = isRecurring
+              ? tx.active
+                ? `Next charge: ${new Date(tx.nextExecution).toLocaleDateString()}`
+                : "Cancelled"
+              : `${isIncome ? "+" : "-"}${formatCurrency(tx.amount)}`;
+            const amountClass = isRecurring
+              ? tx.active
+                ? "text-blue-600"
+                : "text-red-600"
+              : isIncome
+                ? "text-green-600"
+                : "text-red-600";
 
             return (
               <li
@@ -163,6 +176,7 @@ export default function TransactionsPage() {
               </li>
             );
           })}
+
         </ul>
       )}
 
@@ -206,15 +220,31 @@ export default function TransactionsPage() {
               >
                 Edit
               </button>
-              <button
-                onClick={() => {
-                  // Aquí podrías abrir otro modal de confirmación o ejecutar delete directamente
-                  console.log("Delete requested for", selectedTransaction.transactionId);
+                            <button
+                onClick={async () => {
+                  const confirmed = window.confirm("Are you sure you want to delete this transaction?");
+                  if (!confirmed) return;
+
+                  try {
+                    if (selectedTransaction.recurrencePattern) {
+                      await deleteRecurringTransaction(selectedTransaction.transactionId);
+                    } else {
+                      await deleteTransaction(selectedTransaction.transactionId);
+                    }
+                    setTransactions((prev) =>
+                      prev.filter((tx) => tx.transactionId !== selectedTransaction.transactionId)
+                    );
+                    setSelectedTransaction(null);
+                  } catch (error) {
+                    console.error("Failed to delete transaction:", error);
+                    alert("Error deleting transaction.");
+                  }
                 }}
                 className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
               >
                 Delete
               </button>
+
             </div>
           </div>
         </div>

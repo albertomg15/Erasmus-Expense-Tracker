@@ -13,6 +13,7 @@ import { useAuth } from "./context/AuthContext";
 import TransactionsPage from "./pages/Transactions";
 import TransactionNew from './pages/TransactionNew.jsx';
 import BudgetNew from "./pages/BudgetNew";
+import TransactionEdit from './pages/TransactionEdit.jsx';
 
 
 function App() {
@@ -37,7 +38,7 @@ function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/transactions/new" element={<TransactionNew />} />
           <Route path="/budgets/new" element={<BudgetNew />} />
-
+          <Route path="/transactions/edit/:id" element={<TransactionEdit />} />
         </Route>
       </Routes>
     </BrowserRouter>

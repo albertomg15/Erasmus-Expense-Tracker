@@ -120,5 +120,17 @@ public class TransactionController {
         return ResponseEntity.ok("Processed " + processedCount + " recurring transactions.");
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Transaction> updateTransaction(@PathVariable UUID id,
+                                                         @RequestBody Transaction updatedTransaction,
+                                                         @AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return transactionService.update(id, updatedTransaction, user)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
 
 }

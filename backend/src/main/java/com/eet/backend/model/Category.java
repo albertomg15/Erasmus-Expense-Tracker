@@ -35,4 +35,9 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<Transaction> transactions;
+
+    @Column(length = 10)
+    private String emoji; // puede ser null
+
 }
+

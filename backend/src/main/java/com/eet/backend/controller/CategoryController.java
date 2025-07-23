@@ -25,7 +25,7 @@ public class CategoryController {
     public ResponseEntity<List<CategoryDto>> getCategoriesByUser(@PathVariable UUID userId) {
         List<CategoryDto> categories = categoryService.getCategoriesByUserId(userId)
                 .stream()
-                .map(c -> new CategoryDto(c.getCategoryId(), c.getName()))
+                .map(c -> new CategoryDto(c.getCategoryId(), c.getName(),c.getEmoji(), c.isDefault()))
                 .collect(Collectors.toList());
         return ResponseEntity.ok(categories);
     }
@@ -37,11 +37,12 @@ public class CategoryController {
         Category newCategory = Category.builder()
                 .name(dto.getName())
                 .user(user)
+                .emoji(dto.getEmoji())
                 .isDefault(false)
                 .build();
 
         Category saved = categoryService.save(newCategory);
-        return ResponseEntity.ok(new CategoryDto(saved.getCategoryId(), saved.getName()));
+        return ResponseEntity.ok(new CategoryDto(saved.getCategoryId(), saved.getName(), saved.getEmoji(), saved.isDefault()));
     }
 
     @GetMapping
@@ -49,9 +50,35 @@ public class CategoryController {
         List<Category> categories = categoryService.getAllAvailableCategories(userId);
 
         List<CategoryDto> result = categories.stream()
-                .map(c -> new CategoryDto(c.getCategoryId(), c.getName()))
+                .map(c -> new CategoryDto(c.getCategoryId(), c.getName(),c.getEmoji(),c.isDefault()))
                 .toList();
 
         return ResponseEntity.ok(result);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoryDto> updateCategory(@PathVariable UUID id, @RequestBody CategoryDto dto) {
+        Category updated = categoryService.updateCategory(id, dto);
+        return ResponseEntity.ok(new CategoryDto(updated.getCategoryId(), updated.getName(), updated.getEmoji(), updated.isDefault()));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteCategory(@PathVariable UUID id) {
+        Category category = categoryService.getById(id)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        if (category.isDefault()) {
+            return ResponseEntity.status(403).body("Cannot delete default categories");
+        }
+
+        if (categoryService.hasTransactions(id)) {
+            return ResponseEntity.status(409).body("Cannot delete category with existing transactions");
+        }
+
+        categoryService.delete(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
 }

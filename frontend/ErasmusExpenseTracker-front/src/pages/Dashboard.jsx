@@ -134,7 +134,9 @@ export default function Dashboard() {
               const isIncome = tx.type === "INCOME";
               const amountFormatted = `${isIncome ? "+" : "-"}${formatCurrency(tx.amount)}`;
               const amountClass = isIncome ? "text-green-600" : "text-red-600";
-              const categoryName = tx.category?.name || "Uncategorized";
+              const categoryName = tx.category?.emoji
+                ? `${tx.category.emoji} ${tx.category.name}`
+                : tx.category?.name || "Uncategorized";
               const dateFormatted = new Date(tx.date).toLocaleDateString();
 
               return (

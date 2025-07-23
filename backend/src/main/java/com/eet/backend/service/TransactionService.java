@@ -214,4 +214,19 @@ public class TransactionService {
         };
     }
 
+    public Optional<Transaction> update(UUID id, Transaction updated, User user) {
+        return transactionRepository.findById(id)
+                .filter(tx -> tx.getUser().getUserId().equals(user.getUserId()))
+                .map(existing -> {
+                    existing.setAmount(updated.getAmount());
+                    existing.setCurrency(updated.getCurrency());
+                    existing.setDate(updated.getDate());
+                    existing.setDescription(updated.getDescription());
+                    existing.setType(updated.getType());
+                    existing.setCategory(updated.getCategory());
+                    existing.setTrip(updated.getTrip());
+                    return transactionRepository.save(existing);
+                });
+    }
+
 }
