@@ -3,22 +3,22 @@ import { login as loginService } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from 'react-hot-toast';
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
+  const { t } = useTranslation("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
-
   const { login, sessionExpired, setSessionExpired } = useAuth();
 
-  // Mostrar mensaje si la sesión ha expirado
   useEffect(() => {
     if (sessionExpired) {
-      toast.error("Your session has expired. Please log in again.");
-       setSessionExpired(false);
+      toast.error(t("sessionExpired"));
+      setSessionExpired(false);
     }
-  }, [sessionExpired]);
+  }, [sessionExpired, t]);
 
   const isValidEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -28,12 +28,12 @@ export default function Login() {
     setError("");
 
     if (!isValidEmail(email)) {
-      toast.error("Please enter a valid email address.");
+      toast.error(t("invalidEmail"));
       return;
     }
 
     if (password.length < 1) {
-      toast.error("Password cannot be empty.");
+      toast.error(t("emptyPassword"));
       return;
     }
 
@@ -42,23 +42,20 @@ export default function Login() {
       login(data.token);
       navigate("/dashboard");
     } catch (err) {
-      toast.error("Invalid credentials. Please try again.");
+      toast.error(t("invalidCredentials"));
     }
   };
 
   return (
     <div className="min-h-screen bg-[#E6F0FA] flex flex-col items-center justify-center p-6">
       <h2 className="text-3xl sm:text-4xl font-bold text-[#0056B3] mb-8">
-        Welcome Back
+        {t("welcomeBack")}
       </h2>
 
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white shadow-md rounded-xl px-8 py-6 w-full max-w-md"
-      >
+      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-xl px-8 py-6 w-full max-w-md">
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="email">
-            Email address
+            {t("email")}
           </label>
           <input
             type="email"
@@ -72,7 +69,7 @@ export default function Login() {
 
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="password">
-            Password
+            {t("password")}
           </label>
           <input
             type="password"
@@ -84,24 +81,20 @@ export default function Login() {
           />
         </div>
 
-        {error && (
-          <div className="text-red-600 text-sm mb-4">
-            {error}
-          </div>
-        )}
+        {error && <div className="text-red-600 text-sm mb-4">{error}</div>}
 
         <button
           type="submit"
           className="w-full bg-[#0056B3] text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
         >
-          Log In
+          {t("login")}
         </button>
       </form>
 
       <p className="mt-4 text-gray-600">
-        Don't have an account?{" "}
+        {t("noAccount")}{" "}
         <a href="/register" className="text-[#0056B3] underline">
-          Register
+          {t("register")}
         </a>
       </p>
     </div>

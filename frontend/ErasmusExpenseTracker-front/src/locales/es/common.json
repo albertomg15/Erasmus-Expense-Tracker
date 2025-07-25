@@ -1,0 +1,29 @@
+{
+  "appName": "Erasmus Expense Tracker",
+  "confirmLogout": "¿Estás seguro de que deseas cerrar sesión?",
+  "nav": {
+    "home": "Inicio",
+    "trips": "Viajes",
+    "transactions": "Transacciones",
+    "statistics": "Estadísticas",
+    "budgets": "Presupuestos",
+    "profile": "Editar perfil",
+    "logout": "Cerrar sesión"
+  },
+  
+  "tags": {
+    "label": "Etiquetas",
+    "placeholder": "Selecciona etiquetas",
+    "new": "Nueva etiqueta",
+    "edit": "Editar etiqueta",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "created": "Etiqueta creada",
+    "updated": "Etiqueta actualizada",
+    "deleted": "Etiqueta eliminada",
+    "saveError": "Error al guardar etiqueta",
+    "deleteError": "No se puede eliminar la etiqueta (puede que esté en uso)"
+  }
+
+
+}

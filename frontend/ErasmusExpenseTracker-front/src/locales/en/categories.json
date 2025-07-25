@@ -1,0 +1,15 @@
+{
+  "label": "Category",
+  "select": "Select category",
+  "new": "+ New Category",
+  "editCategory": "Edit Category",
+  "newCategory": "New Category",
+  "chooseEmoji": "Choose Emoji",
+  "cancel": "Cancel",
+  "save": "Save",
+  "created": "Category created",
+  "updated": "Category updated",
+  "error": "Error saving category",
+  "deleted": "Category deleted",
+  "cannotDelete": "Cannot delete: this category is used in existing transactions."
+}

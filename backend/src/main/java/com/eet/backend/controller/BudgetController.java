@@ -1,6 +1,7 @@
 package com.eet.backend.controller;
 
 import com.eet.backend.dto.BudgetDto;
+import com.eet.backend.dto.BudgetWithSpentDto;
 import com.eet.backend.model.Budget;
 import com.eet.backend.model.User;
 import com.eet.backend.service.BudgetService;
@@ -28,6 +29,15 @@ public class BudgetController {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         List<Budget> budgets = budgetService.getByUserId(user.getUserId());
         return ResponseEntity.ok(budgets);
+    }
+
+
+    @GetMapping("/with-spent")
+    public ResponseEntity<List<BudgetWithSpentDto>> getBudgetsWithSpent(@AuthenticationPrincipal UserDetails userDetails) {
+        User user = userService.getByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        return ResponseEntity.ok(budgetService.getBudgetsWithSpent(user.getUserId()));
     }
 
     @GetMapping("/{id}")
@@ -81,27 +91,7 @@ public class BudgetController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/default")
-    public ResponseEntity<Budget> getDefaultBudget(@AuthenticationPrincipal UserDetails userDetails) {
-        UUID userId = userService.getByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"))
-                .getUserId();
 
-        return budgetService.getDefaultBudget(userId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PutMapping("/default")
-    public ResponseEntity<Budget> updateDefaultBudget(@AuthenticationPrincipal UserDetails userDetails,
-                                                      @RequestBody Budget updated) {
-        UUID userId = userService.getByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"))
-                .getUserId();
-
-        Budget result = budgetService.saveOrUpdateDefaultBudget(userId, updated.getMaxSpending(), updated.getWarningThreshold());
-        return ResponseEntity.ok(result);
-    }
 
     @GetMapping("/monthly")
     public ResponseEntity<List<Budget>> getMonthlyBudgets(@AuthenticationPrincipal UserDetails userDetails) {

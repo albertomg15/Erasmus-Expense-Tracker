@@ -1,0 +1,82 @@
+{
+  "editTitle": "Edit Transaction",
+  "newTitle": "Add New Transaction",
+  "allTitle": "All Transactions",
+  "addTransaction": "Add Transaction",
+  "type": "Type",
+  "expense": "Expense",
+  "income": "Income",
+  "amount": "Amount",
+  "currency": "Currency",
+  "category": "Category",
+  "selectCategory": "-- Select category --",
+  "date": "Date",
+  "description": "Description",
+  "descriptionOptional": "Description (optional)",
+  "tripOptional": "Trip (optional)",
+  "associatedTripOptional": "Associated Trip (optional)",
+  "none": "-- None --",
+  "recurrencePattern": "Recurrence Pattern",
+  "daily": "Daily",
+  "weekly": "Weekly",
+  "monthly": "Monthly",
+  "yearly": "Yearly",
+  "nextExecution": "Next Execution",
+  "recurrenceEndDate": "Recurrence End Date",
+  "nextExecutionDate": "Next Execution Date",
+  "recurrenceEndDateOptional": "Recurrence End Date (optional)",
+  "maxOccurrences": "Max Occurrences",
+  "maxOccurrencesOptional": "Max Occurrences (optional)",
+  "isRecurring": "Is this a recurring transaction?",
+  "recurringHint": "A recurring transaction will automatically generate a new standard transaction when the next execution date is reached.",
+  "active": "Active",
+  "activeHint": "(Uncheck to deactivate this recurring transaction)",
+  "saveChanges": "Save Changes",
+  "saving": "Saving...",
+  "createSuccess": "Transaction created successfully.",
+  "createError": "Error creating transaction.",
+  "updateSuccess": "Transaction updated successfully.",
+  "updateError": "Failed to update transaction.",
+  "notFound": "Transaction not found",
+  "loading": "Loading...",
+  
+  "confirmDelete": "Are you sure you want to delete this transaction?",
+  "deleteError": "Error deleting transaction.",
+  "uncategorized": "Uncategorized",
+  "recurring": "Recurring",
+  "details": "Transaction Details",
+  "inactive": "Inactive",
+  "delete": "Delete",
+
+
+  
+  "validation": {
+    "amount": "Amount must be a positive number.",
+    "currency": "Currency is required.",
+    "category": "Category is required.",
+    "date": "Date is required."
+  }
+  ,
+  
+  "filter": {
+    "allTypes": "All types",
+    "allMonths": "All months",
+    "allKinds": "All kinds",
+    "regularOnly": "Regular only",
+    "recurringOnly": "Recurring only",
+    "allTrips": "All trips"
+  },
+  "sort": {
+    "newestFirst": "Newest first",
+    "oldestFirst": "Oldest first"
+  },
+  "pagination": {
+    "prev": "Prev",
+    "next": "Next",
+    "page": "Page",
+    "of": "of"
+  }
+}
+
+  
+

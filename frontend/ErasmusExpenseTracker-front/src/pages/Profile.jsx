@@ -1,251 +1,201 @@
-import { useEffect, useState } from "react";
-import { getDefaultBudget, updateDefaultBudget } from "../services/budgetService";
-import { getUserInfo, updateUser, changePassword } from "../services/userService";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
-import { toast } from "react-hot-toast";
+import { getUserInfo, updateUser } from "../services/userService";
+import { changePassword } from "../services/userService";
+import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 
-export default function Profile() {
-  const { token } = useAuth();
-  const [user, setUser] = useState({
-    email: "",
-    language: "",
-    preferredCurrency: "",
-  });
 
-  const [budget, setBudget] = useState({
-    budgetId: null,
-    maxSpending: "",
-    warningThreshold: "",
-  });
+const Profile = () => {
+  const { token, userId } = useAuth();
+
+ const [user, setUser] = useState(null);
+const [loadError, setLoadError] = useState(false);
 
   const [editing, setEditing] = useState(false);
+
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
+  const { t, i18n } = useTranslation("profile");
+
+  const handleLanguageChange = (e) => {
+    i18n.changeLanguage(e.target.value);
+  };
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-  const userData = await getUserInfo();
-  setUser(userData);
-
-  try {
-    const budgetData = await getDefaultBudget();
-    if (budgetData) {
-      const { budgetId, maxSpending, warningThreshold } = budgetData;
-      setBudget({ budgetId, maxSpending, warningThreshold });
-    }
-  } catch (budgetErr) {
-    // Si devuelve 404, asumimos que no hay presupuesto aún
-    console.warn("No default budget found");
-    setBudget(null);
-  }
-
-} catch (err) {
-  console.error("Error loading profile data:", err);
-}
-
-    }
-
-    fetchData();
-  }, []);
-
-  const handleUserChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
-  };
-
-  const handleBudgetChange = (e) => {
-    setBudget({ ...budget, [e.target.name]: e.target.value });
-  };
+  getUserInfo()
+    .then(setUser)
+    .catch((err) => {
+      console.error("Error loading user:", err);
+      setLoadError(true);
+    });
+}, []);
 
   const handleSave = async () => {
     if (!user.email || !user.language || !user.preferredCurrency) {
-      toast.error("Please complete all personal data fields.");
-      return;
-    }
-
-    const maxSpendingNum = parseFloat(budget.maxSpending);
-    const warningThresholdNum = parseFloat(budget.warningThreshold);
-
-    if (isNaN(maxSpendingNum) || isNaN(warningThresholdNum)) {
-      toast.error("Budget values must be valid numbers.");
+      toast.error(t("errorIncomplete"));
       return;
     }
 
     try {
       await updateUser(user);
-      await updateDefaultBudget({
-        maxSpending: maxSpendingNum,
-        warningThreshold: warningThresholdNum,
-      });
-
-
-      toast.success("Data updated successfully.");
+      i18n.changeLanguage(user.language);
+      toast.success(t("updateSuccess"));
       setEditing(false);
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update data.");
+      toast.error(t("updateError"));
     }
   };
 
-  const handlePasswordSubmit = async (e) => {
-    e.preventDefault();
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error("New passwords do not match.");
+  const handlePasswordChange = async () => {
+    if (!newPassword || !confirmPassword || !currentPassword) return;
+
+    if (newPassword !== confirmPassword) {
+      toast.error(t("passwordMismatch"));
       return;
     }
 
     try {
-      await changePassword({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword,
-      });
-      toast.success("Password updated successfully.");
+      await changePassword(userId, currentPassword, newPassword);
+      toast.success(t("passwordSuccess"));
       setShowPasswordForm(false);
-      setPasswordForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (error) {
-      toast.error(error.message || "Failed to change password.");
+      setNewPassword("");
+      setConfirmPassword("");
+      setCurrentPassword("");
+    } catch (err) {
+      console.error(err);
+      toast.error(t("passwordError"));
     }
   };
 
+  if (!user) return <div className="p-6">{t("loading") || "Loading..."}</div>;
+
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">User Profile</h1>
+      <h1 className="text-2xl font-bold mb-4">{t("title")}</h1>
 
-      {/* Personal Data */}
-      <section className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Personal Data</h2>
-        <input
-          type="email"
-          name="email"
-          value={user.email}
-          onChange={handleUserChange}
-          className="w-full mb-2 p-2 border rounded"
-          disabled
-        />
-        <div className="mb-2">
-          <label className="block mb-1">Language</label>
-          <select
-            name="language"
-            value={user.language}
-            onChange={handleUserChange}
-            className="w-full p-2 border rounded"
-            disabled={!editing}
-          >
-            <option value="en">English</option>
-            <option value="es">Spanish</option>
-          </select>
-        </div>
-        <div className="mb-2">
-          <label className="block mb-1">Preferred Currency</label>
+      <div className="bg-white shadow p-6 rounded-2xl space-y-4">
+        <h2 className="text-lg font-semibold">{t("personalData")}</h2>
+
+        <div>
+          <label className="block mb-1">{t("email")}</label>
           <input
-            name="preferredCurrency"
-            value={user.preferredCurrency}
-            onChange={handleUserChange}
+            type="email"
             className="w-full p-2 border rounded"
-            disabled={!editing}
+            value={user.email}
+            disabled
           />
         </div>
-      </section>
 
-      {/* Budget */}
-      <section className="mb-6">
-  <h2 className="text-xl font-semibold mb-2">Default Budget</h2>
-
-  {(budget || editing) ? (
-    <>
-      <div className="mb-2">
-        <label className="block mb-1">Monthly Maximum Spending</label>
-        <input
-          type="number"
-          name="maxSpending"
-          value={budget?.maxSpending || ""}
-          onChange={handleBudgetChange}
-          className="w-full p-2 border rounded"
-          disabled={!editing}
-        />
-      </div>
-      <div>
-        <label className="block mb-1">Warning Threshold</label>
-        <input
-          type="number"
-          name="warningThreshold"
-          value={budget?.warningThreshold || ""}
-          onChange={handleBudgetChange}
-          className="w-full p-2 border rounded"
-          disabled={!editing}
-        />
-      </div>
-    </>
-  ) : (
-    <p className="text-gray-600 italic">
-      No default budget set. Click "Edit" to establish one.
-    </p>
-  )}
-</section>
+        <div className="mb-4">
+          <label htmlFor="language" className="block font-medium mb-1">
+            {t("language")}
+          </label>
+          <select
+            id="language"
+            value={user.language}
+            onChange={(e) => setUser({ ...user, language: e.target.value })}
+            disabled={!editing}
+            className={`w-full border rounded px-3 py-2 ${
+              editing ? "bg-white" : "bg-gray-100 text-gray-500"
+            }`}
+          >
+            <option value="en">English</option>
+            <option value="es">Español</option>
+          </select>
+        </div>
 
 
 
-      {/* Action Buttons */}
-      <div className="flex gap-4 mb-6">
-        <button onClick={() => setEditing(!editing)} className="bg-erasmus-blue text-white px-4 py-2 rounded">
-          {editing ? "Cancel" : "Edit"}
-        </button>
-        {editing && (
-          <button onClick={handleSave} className="bg-green-600 text-white px-4 py-2 rounded">
-            Save Changes
+        <div>
+          <label className="block mb-1">{t("preferredCurrency")}</label>
+          <input
+            type="text"
+            className="w-full p-2 border rounded"
+            value={user.preferredCurrency || ""}
+            disabled={!editing}
+            onChange={(e) => setUser({ ...user, preferredCurrency: e.target.value })}
+          />
+        </div>
+
+        <div className="flex gap-2">
+          <button
+            className="bg-blue-600 text-white px-4 py-2 rounded"
+            onClick={() => {
+              if (editing) handleSave();
+              else setEditing(true);
+            }}
+          >
+            {editing ? t("saveChanges") : t("edit")}
           </button>
-        )}
+
+          {editing && (
+            <button
+              className="bg-gray-500 text-white px-4 py-2 rounded"
+              onClick={() => {
+                setEditing(false);
+              }}
+            >
+              {t("cancel")}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Password Section */}
-      <section>
-        <h2 className="text-xl font-semibold mb-2">Password</h2>
+      <div className="mt-8 bg-white shadow p-6 rounded-2xl space-y-4">
+        <h2 className="text-lg font-semibold">{t("password")}</h2>
+
         <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
           onClick={() => setShowPasswordForm(!showPasswordForm)}
-          className="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded"
         >
-          {showPasswordForm ? "Hide form" : "Change password"}
+          {showPasswordForm ? t("hideForm") : t("changePassword")}
         </button>
 
         {showPasswordForm && (
-          <form onSubmit={handlePasswordSubmit} className="space-y-2 mt-2">
-            <input
-              type="password"
-              name="currentPassword"
-              value={passwordForm.currentPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, currentPassword: e.target.value })}
-              placeholder="Current Password"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="password"
-              name="newPassword"
-              value={passwordForm.newPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, newPassword: e.target.value })}
-              placeholder="New Password"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <input
-              type="password"
-              name="confirmPassword"
-              value={passwordForm.confirmPassword}
-              onChange={(e) => setPasswordForm({ ...passwordForm, confirmPassword: e.target.value })}
-              placeholder="Confirm New Password"
-              className="w-full p-2 border rounded"
-              required
-            />
-            <button type="submit" className="bg-erasmus-blue text-white px-4 py-2 rounded">
-              Update Password
+          <div className="space-y-4">
+            <div>
+              <label className="block mb-1">{t("currentPassword")}</label>
+              <input
+                type="password"
+                className="w-full p-2 border rounded"
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block mb-1">{t("newPassword")}</label>
+              <input
+                type="password"
+                className="w-full p-2 border rounded"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block mb-1">{t("confirmPassword")}</label>
+              <input
+                type="password"
+                className="w-full p-2 border rounded"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+              />
+            </div>
+            <button
+              className="bg-green-600 text-white px-4 py-2 rounded"
+              onClick={handlePasswordChange}
+            >
+              {t("updatePassword")}
             </button>
-          </form>
+          </div>
         )}
-      </section>
+      </div>
     </div>
   );
-}
+};
+
+export default Profile;

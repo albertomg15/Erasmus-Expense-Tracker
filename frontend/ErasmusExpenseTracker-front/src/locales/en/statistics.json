@@ -1,0 +1,43 @@
+{
+  "title": "Statistics",
+  "loading": "Loading statistics...",
+  "errorLoading": "Failed to load statistics.",
+  "budgetUsage": "Budget Usage",
+  "expensesByCategory": "Expenses by Category",
+  "noCategoryData": "No expense data for this month.",
+  "filters": {
+    "month": "Month",
+    "year": "Year"
+  },
+  
+  "tabs": {
+    "summary": "Summary",
+    "evolution": "Income & Expenses Over Time",
+    "categories": "Expenses by Category",
+    "incomeVsExpense": "Income vs Expense",
+    "monthlyComparison": "Monthly Comparison",
+    "tripSpending": "Trip Spending",
+    "annualSummary": "Annual Summary"
+  },
+  "labels": {
+    "income": "Income",
+    "expense": "Expense",
+    "savings": "Savings",
+    "totalSpent": "Total Spent",
+    "year": "Year"
+  },
+  "errors": {
+    "invalidChartData": "Invalid data for annual summary chart"
+  },
+
+
+  "stat": {
+    "income": "Income",
+    "expenses": "Expenses",
+    "balance": "Balance"
+  },
+  "budget": {
+    "used": "Used",
+    "total": "Total"
+  }
+}

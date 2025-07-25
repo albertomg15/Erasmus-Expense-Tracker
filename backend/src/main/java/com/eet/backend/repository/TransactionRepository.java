@@ -29,4 +29,22 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
     Optional<BigDecimal> sumExpensesInDateRange(@Param("user") User user, @Param("start") LocalDate start, @Param("end") LocalDate end);
 
     boolean existsByCategoryCategoryId(UUID categoryId);
+
+    List<Transaction> findByTrip_TripId(UUID tripId);
+
+    @Query("SELECT SUM(t.amount) FROM Transaction t WHERE t.user.userId = :userId AND MONTH(t.date) = :month AND YEAR(t.date) = :year")
+    Optional<BigDecimal> getTotalSpentByUserAndMonthAndYear(
+            @Param("userId") UUID userId,
+            @Param("month") int month,
+            @Param("year") int year
+    );
+
+    List<Transaction> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
+
+    List<Transaction> findByUserAndDateAfter(User user, LocalDate startDate);
+
+    List<Transaction> findByUserUserIdAndDateBetween(UUID userId, LocalDate start, LocalDate end);
+
+    List<Transaction> findByUserIdAndTrip_TripIdAndType(UUID userId, UUID tripId, TransactionType type);
+
 }

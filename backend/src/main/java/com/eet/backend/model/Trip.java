@@ -2,6 +2,7 @@ package com.eet.backend.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.AssertTrue;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -36,12 +37,39 @@ public class Trip {
     @Column(name = "end_date", nullable = false)
     private LocalDate endDate;
 
+    @Column(name = "estimated_budget")
+    private Double estimatedBudget;
+
+    @Column(length = 1000)
+    private String notes;
+
+    @Column(nullable = false)
+    private String currency;
+
+
+
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     @JsonIgnore
     private User user;
 
+    @ManyToMany
+    @JoinTable(
+            name = "trip_tags",
+            joinColumns = @JoinColumn(name = "trip_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private List<Tag> tags;
+
+
+
+
     @OneToMany(mappedBy = "trip", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
+
+    @AssertTrue(message = "End date must be after or equal to start date")
+    public boolean isDatesValid() {
+        return startDate != null && endDate != null && !startDate.isAfter(endDate);
+    }
 }
 

@@ -1,0 +1,14 @@
+{
+  "title": "Panel de control",
+  "loading": "Cargando panel...",
+  "currentBalance": "Saldo actual",
+  "spentThisMonth": "Gastado este mes",
+  "monthlyLimit": "Límite mensual",
+  "leftThisMonth": "restantes este mes",
+  "setBudget": "Establecer presupuesto mensual",
+  "latestTransactions": "Últimas transacciones",
+  "addTransaction": "Añadir transacción",
+  "noTransactions": "No se encontraron transacciones este mes.",
+  "viewAll": "Ver todas las transacciones",
+  "uncategorized": "Sin categoría"
+}

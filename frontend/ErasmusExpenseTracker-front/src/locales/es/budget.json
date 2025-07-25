@@ -1,0 +1,47 @@
+{
+  "editTitle": "Editar presupuesto mensual",
+  "newTitle": "Nuevo presupuesto mensual",
+  "month": "Mes",
+  "year": "Año",
+  "maxSpending": "Gasto máximo (€)",
+  "warningThreshold": "Umbral de aviso (€)",
+  "tooltipMax": "Importe estimado que planeas gastar durante el mes seleccionado.",
+  "tooltipWarning": "Recibirás una alerta cuando tus gastos alcancen esta cantidad.",
+  "save": "Guardar presupuesto",
+  "update": "Actualizar presupuesto",
+  "cancel": "Cancelar",
+  "createdSuccess": "Presupuesto creado correctamente.",
+  "updatedSuccess": "Presupuesto actualizado correctamente.",
+  "deletedSuccess": "Presupuesto eliminado correctamente.",
+  "loadError": "Error al cargar el presupuesto.",
+  "createError": "Error al crear el presupuesto.",
+  "updateError": "Error al actualizar el presupuesto.",
+  "deleteError": "Error al eliminar el presupuesto.",
+  "validation": {
+    "required": "Mes y año son obligatorios.",
+    "invalidNumbers": "Los valores del presupuesto deben ser números válidos.",
+    "threshold": "El gasto máximo debe ser mayor que el umbral de aviso."
+  },
+  "listTitle": "📅 Presupuestos mensuales",
+  "addButton": "➕ Añadir presupuesto",
+  "filterYear": "Filtrar por año:",
+  "sortBy": "Ordenar por:",
+  "sort": {
+    "month": "Mes",
+    "maxSpending": "Gasto máximo",
+    "spent": "Gastado"
+  },
+  "table": {
+    "month": "Mes",
+    "year": "Año",
+    "max": "Gasto máximo (€)",
+    "warning": "Umbral de aviso (€)",
+    "actions": "Acciones",
+    "progress": "Progreso",
+    "edit": "✏️ Editar",
+    "delete": "🗑️ Eliminar",
+    "confirmDelete": "¿Estás seguro de que deseas eliminar este presupuesto?"
+  },
+  "allYears": "Todos los años"
+
+}

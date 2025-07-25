@@ -1,0 +1,26 @@
+{
+  "appName": "Erasmus Expense Tracker",
+  "confirmLogout": "Are you sure you want to log out?",
+  "nav": {
+    "home": "Home",
+    "trips": "Trips",
+    "transactions": "Transactions",
+    "statistics": "Statistics",
+    "budgets": "Budgets",
+    "profile": "Edit Profile",
+    "logout": "Logout"
+  },
+  "tags": {
+    "label": "Tags",
+    "placeholder": "Select tags",
+    "new": "New Tag",
+    "edit": "Edit Tag",
+    "cancel": "Cancel",
+    "save": "Save",
+    "created": "Tag created",
+    "updated": "Tag updated",
+    "deleted": "Tag deleted",
+    "saveError": "Error saving tag",
+    "deleteError": "Cannot delete tag (maybe it’s in use)"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "title": "Estadísticas",
+  "loading": "Cargando estadísticas...",
+  "errorLoading": "No se pudieron cargar las estadísticas.",
+  "budgetUsage": "Uso del presupuesto",
+  "expensesByCategory": "Gastos por categoría",
+  "noCategoryData": "No hay datos de gastos para este mes.",
+  "filters": {
+    "month": "Mes",
+    "year": "Año"
+  },
+  "tabs": {
+    "summary": "Resumen",
+    "evolution": "Ingresos y gastos en el tiempo",
+    "categories": "Gastos por categoría",
+    "incomeVsExpense": "Ingresos vs Gastos",
+    "monthlyComparison": "Comparativa mensual",
+    "tripSpending": "Gasto por viaje",
+    "annualSummary": "Resumen anual"
+  },
+  "labels": {
+    "income": "Ingresos",
+    "expense": "Gastos",
+    "savings": "Ahorros",
+    "totalSpent": "Total gastado",
+    "year": "Año"
+  },
+  "errors": {
+    "invalidChartData": "Datos inválidos para el gráfico de resumen anual"
+  },
+  
+  "stat": {
+    "income": "Ingresos",
+    "expense": "Gastos",
+    "balance": "Saldo"
+  },
+  "budget": {
+    "used": "Usado",
+    "total": "Total"
+  }
+  
+
+
+}

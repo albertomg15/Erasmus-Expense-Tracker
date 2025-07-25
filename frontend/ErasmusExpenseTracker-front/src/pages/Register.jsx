@@ -2,8 +2,11 @@ import { useState } from "react";
 import { register } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { useTranslation } from "react-i18next";
 
 export default function Register() {
+  const { t } = useTranslation("auth");
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -17,37 +20,36 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    console.log("Submit triggered");
 
     if (!isValidEmail(email)) {
-      toast.error("Please enter a valid email address.");
+      toast.error(t("invalidEmail"));
       return;
     }
 
     if (password.length < 6) {
-      toast.error("Password must be at least 6 characters.");
+      toast.error(t("passwordTooShort"));
       return;
     }
 
     if (password !== repeatPassword) {
-      toast.error("Passwords do not match.");
+      toast.error(t("passwordsMismatch"));
       return;
     }
 
     try {
       await register({ email, password, preferredCurrency, language });
-      toast.success("Registration successful! Please log in.");
+      toast.success(t("registrationSuccess"));
       navigate("/login");
     } catch (err) {
       console.error("Registration error:", err);
-      toast.error("Registration failed. Please try again.");
+      toast.error(t("registrationFailed"));
     }
   };
 
   return (
     <div className="min-h-screen bg-[#E6F0FA] flex flex-col items-center justify-center p-6">
       <h2 className="text-3xl sm:text-4xl font-bold text-[#0056B3] mb-8">
-        Create an Account
+        {t("createAccount")}
       </h2>
 
       <form
@@ -56,7 +58,7 @@ export default function Register() {
       >
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="email">
-            Email address
+            {t("email")}
           </label>
           <input
             type="email"
@@ -70,7 +72,7 @@ export default function Register() {
 
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="password">
-            Password
+            {t("password")}
           </label>
           <input
             type="password"
@@ -85,7 +87,7 @@ export default function Register() {
 
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="repeatPassword">
-            Repeat Password
+            {t("repeatPassword")}
           </label>
           <input
             type="password"
@@ -99,7 +101,7 @@ export default function Register() {
 
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="preferredCurrency">
-            Preferred Currency
+            {t("preferredCurrency")}
           </label>
           <input
             type="text"
@@ -113,7 +115,7 @@ export default function Register() {
 
         <div className="mb-4">
           <label className="block text-gray-700 mb-2" htmlFor="language">
-            Language
+            {t("language")}
           </label>
           <input
             type="text"
@@ -125,19 +127,18 @@ export default function Register() {
           />
         </div>
 
-
         <button
           type="submit"
           className="w-full bg-[#0056B3] text-white py-2 px-4 rounded-md hover:bg-blue-700 transition"
         >
-          Register
+          {t("register")}
         </button>
       </form>
 
       <p className="mt-4 text-gray-600">
-        Already have an account?{" "}
+        {t("alreadyAccount")}{" "}
         <a href="/login" className="text-[#0056B3] underline">
-          Log in
+          {t("login")}
         </a>
       </p>
     </div>

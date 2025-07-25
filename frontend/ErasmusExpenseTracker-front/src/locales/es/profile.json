@@ -1,0 +1,23 @@
+{
+  "title": "Perfil de Usuario",
+  "personalData": "Datos Personales",
+  "email": "Correo electrónico",
+  "language": "Idioma",
+  "preferredCurrency": "Moneda preferida",
+  "edit": "Editar",
+  "cancel": "Cancelar",
+  "saveChanges": "Guardar cambios",
+  "password": "Contraseña",
+  "changePassword": "Cambiar contraseña",
+  "hideForm": "Ocultar formulario",
+  "currentPassword": "Contraseña actual",
+  "newPassword": "Nueva contraseña",
+  "confirmPassword": "Confirmar nueva contraseña",
+  "updatePassword": "Actualizar contraseña",
+  "errorIncomplete": "Por favor, completa todos los campos de datos personales.",
+  "updateSuccess": "Datos actualizados correctamente.",
+  "updateError": "Error al actualizar los datos.",
+  "passwordMismatch": "Las nuevas contraseñas no coinciden.",
+  "passwordSuccess": "Contraseña actualizada correctamente.",
+  "passwordError": "Error al cambiar la contraseña."
+}

@@ -48,26 +48,14 @@ export const updateBudget = async (budget) => {
   return res.json();
 };
 
-export const getDefaultBudget = async () => {
-  const res = await fetch(`${API_BASE_URL}/api/budgets/default`, {
+export const getBudgetsWithSpent = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/budgets/with-spent`, {
     headers: getAuthHeaders(),
   });
-  if (!res.ok) throw new Error("Failed to fetch default budget");
+  if (!res.ok) throw new Error("Failed to fetch budgets with spent data");
   return res.json();
 };
 
-export const updateDefaultBudget = async (budget) => {
-  const res = await fetch(`${API_BASE_URL}/api/budgets/default`, {
-    method: "PUT",
-    headers: {
-      ...getAuthHeaders(),
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(budget),
-  });
-  if (!res.ok) throw new Error("Failed to update default budget");
-  return res.json();
-};
 
 export const getMonthlyBudgets = async () => {
   const res = await fetch(`${API_BASE_URL}/api/budgets/monthly`, {

@@ -1,0 +1,14 @@
+{
+  "title": "Dashboard",
+  "loading": "Loading dashboard...",
+  "currentBalance": "Current Balance",
+  "spentThisMonth": "Spent this month",
+  "monthlyLimit": "Monthly Limit",
+  "leftThisMonth": "left this month",
+  "setBudget": "Set Monthly Budget",
+  "latestTransactions": "Latest Transactions",
+  "addTransaction": "Add Transaction",
+  "noTransactions": "No transactions found for this month.",
+  "viewAll": "View all transactions",
+  "uncategorized": "Uncategorized"
+}

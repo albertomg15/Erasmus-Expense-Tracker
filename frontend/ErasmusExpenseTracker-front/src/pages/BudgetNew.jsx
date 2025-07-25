@@ -2,8 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createOrUpdateMonthlyBudget } from "../services/budgetService";
 import { toast } from "react-hot-toast";
+import { useTranslation } from "react-i18next";
+import i18n from "../i18n"; // Ajusta la ruta si es diferente
+
 
 export default function BudgetNew() {
+  const { t } = useTranslation("budget");
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
@@ -25,16 +29,11 @@ export default function BudgetNew() {
     const monthNum = parseInt(form.month);
     const yearNum = parseInt(form.year);
 
-    // Validaciones
-    if (!monthNum || !yearNum) {
-      toast.error("Month and Year are required.");
-      return;
-    }
-
-    if (isNaN(maxSpendingNum) || isNaN(warningThresholdNum)) {
-      toast.error("Both budget values must be valid numbers.");
-      return;
-    }
+    if (!monthNum || !yearNum) return toast.error(t("validation.required"));
+    if (isNaN(maxSpendingNum) || isNaN(warningThresholdNum))
+      return toast.error(t("validation.invalidNumbers"));
+    if (maxSpendingNum <= warningThresholdNum)
+      return toast.error(t("validation.threshold"));
 
     try {
       await createOrUpdateMonthlyBudget({
@@ -43,20 +42,20 @@ export default function BudgetNew() {
         warningThreshold: warningThresholdNum,
       });
 
-      toast.success("Budget created successfully.");
+      toast.success(t("createdSuccess"));
       navigate("/dashboard");
     } catch (err) {
       console.error(err);
-      toast.error("Error creating budget.");
+      toast.error(t("createError"));
     }
   };
 
   return (
     <div className="p-6 max-w-lg mx-auto">
-      <h1 className="text-2xl font-bold mb-4">New Monthly Budget</h1>
+      <h1 className="text-2xl font-bold mb-4">{t("newTitle")}</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block mb-1 font-medium">Month</label>
+          <label className="block mb-1 font-medium">{t("month")}</label>
           <select
             name="month"
             value={form.month}
@@ -66,14 +65,15 @@ export default function BudgetNew() {
           >
             {Array.from({ length: 12 }, (_, i) => (
               <option key={i + 1} value={i + 1}>
-                {new Date(0, i).toLocaleString("en", { month: "long" })}
+                {new Date(0, i).toLocaleString(i18n.language, { month: "long" })}
               </option>
             ))}
+
           </select>
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Year</label>
+          <label className="block mb-1 font-medium">{t("year")}</label>
           <input
             type="number"
             name="year"
@@ -85,7 +85,10 @@ export default function BudgetNew() {
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Max Spending (€)</label>
+          <label className="block mb-1 font-medium">
+            {t("maxSpending")}
+            <span className="ml-1 cursor-help text-blue-600" title={t("tooltipMax")}>ℹ️</span>
+          </label>
           <input
             type="number"
             name="maxSpending"
@@ -97,7 +100,10 @@ export default function BudgetNew() {
         </div>
 
         <div>
-          <label className="block mb-1 font-medium">Warning Threshold (€)</label>
+          <label className="block mb-1 font-medium">
+            {t("warningThreshold")}
+            <span className="ml-1 cursor-help text-yellow-600" title={t("tooltipWarning")}>ℹ️</span>
+          </label>
           <input
             type="number"
             name="warningThreshold"
@@ -110,14 +116,14 @@ export default function BudgetNew() {
 
         <div className="flex gap-4">
           <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded">
-            Save Budget
+            {t("save")}
           </button>
           <button
             type="button"
             onClick={() => navigate(-1)}
             className="bg-gray-300 text-black px-4 py-2 rounded"
           >
-            Cancel
+            {t("cancel")}
           </button>
         </div>
       </form>

@@ -6,14 +6,21 @@ import NotFound from './pages/NotFound.jsx';
 import Landing from './pages/Landing';
 import PrivateRoute from "./components/PrivateRoute";
 import NavBar from "./components/Navbar.jsx"
-import Trips from "./pages/Trips";
+import Trips from "./pages/TripsPage.jsx";
 import Profile from "./pages/Profile";
-import Statistics from "./pages/Statistics.jsx";
+import Statistics from "./pages/StatsPage.jsx";
 import { useAuth } from "./context/AuthContext"; 
 import TransactionsPage from "./pages/Transactions";
 import TransactionNew from './pages/TransactionNew.jsx';
 import BudgetNew from "./pages/BudgetNew";
 import TransactionEdit from './pages/TransactionEdit.jsx';
+import TripNew from "./pages/TripNew";
+import TripDetail from "./pages/TripDetail.jsx";
+import TripEdit from "./pages/TripEdit";
+import BudgetsPage from "./pages/BudgetsPage.jsx";
+import BudgetEdit from "./pages/BudgetEdit.jsx";
+
+
 
 
 function App() {
@@ -39,6 +46,14 @@ function App() {
           <Route path="/transactions/new" element={<TransactionNew />} />
           <Route path="/budgets/new" element={<BudgetNew />} />
           <Route path="/transactions/edit/:id" element={<TransactionEdit />} />
+          <Route path="/trips/new" element={<TripNew />} />
+          <Route path="/trips/:tripId" element={<TripDetail />} />
+          <Route path="/trips/edit/:tripId" element={<TripEdit />} />
+          <Route path="/budgets" element={<BudgetsPage />} />
+          <Route path="/budgets/edit/:budgetId" element={<BudgetEdit />} />
+
+
+
         </Route>
       </Routes>
     </BrowserRouter>

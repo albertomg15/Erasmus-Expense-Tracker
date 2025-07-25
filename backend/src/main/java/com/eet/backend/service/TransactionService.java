@@ -7,6 +7,7 @@ import com.eet.backend.model.*;
 import com.eet.backend.repository.BudgetRepository;
 import com.eet.backend.repository.RecurringTransactionRepository;
 import com.eet.backend.repository.TransactionRepository;
+import com.eet.backend.repository.TripRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -34,6 +35,7 @@ public class TransactionService {
 
     private final RecurringTransactionRepository recurringTransactionRepository;
 
+    private final TripRepository tripRepository;
 
     public DashboardDto getDashboard(User user) {
         List<Transaction> transactions = transactionRepository.findByUser(user);
@@ -79,6 +81,13 @@ public class TransactionService {
     }
 
     public Transaction save(Transaction transaction) {
+        if (transaction.getTrip() != null && transaction.getTrip().getTripId() != null) {
+            UUID tripId = transaction.getTrip().getTripId();
+            Trip trip = tripRepository.findById(tripId)
+                    .orElseThrow(() -> new RuntimeException("Trip not found: " + tripId));
+            transaction.setTrip(trip); // asigna la entidad real
+        }
+
         return transactionRepository.save(transaction);
     }
 
@@ -224,9 +233,21 @@ public class TransactionService {
                     existing.setDescription(updated.getDescription());
                     existing.setType(updated.getType());
                     existing.setCategory(updated.getCategory());
-                    existing.setTrip(updated.getTrip());
+                    if (updated.getTrip() != null && updated.getTrip().getTripId() != null) {
+                        UUID tripId = updated.getTrip().getTripId();
+                        Trip trip = tripRepository.findById(tripId)
+                                .orElseThrow(() -> new RuntimeException("Trip not found: " + tripId));
+                        existing.setTrip(trip);
+                    } else {
+                        existing.setTrip(null); // por si se quiere desvincular de un viaje
+                    }
+
                     return transactionRepository.save(existing);
                 });
+    }
+
+    public List<Transaction> getByTripId(UUID tripId) {
+        return transactionRepository.findByTrip_TripId(tripId);
     }
 
 }

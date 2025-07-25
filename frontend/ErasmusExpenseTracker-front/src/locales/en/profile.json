@@ -1,0 +1,23 @@
+{
+  "title": "User Profile",
+  "personalData": "Personal Data",
+  "email": "Email",
+  "language": "Language",
+  "preferredCurrency": "Preferred Currency",
+  "edit": "Edit",
+  "cancel": "Cancel",
+  "saveChanges": "Save Changes",
+  "password": "Password",
+  "changePassword": "Change password",
+  "hideForm": "Hide form",
+  "currentPassword": "Current Password",
+  "newPassword": "New Password",
+  "confirmPassword": "Confirm New Password",
+  "updatePassword": "Update Password",
+  "errorIncomplete": "Please complete all personal data fields.",
+  "updateSuccess": "Data updated successfully.",
+  "updateError": "Failed to update data.",
+  "passwordMismatch": "New passwords do not match.",
+  "passwordSuccess": "Password updated successfully.",
+  "passwordError": "Failed to change password."
+}

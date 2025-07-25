@@ -3,7 +3,7 @@ import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "../utils/formatters";
 import { getDashboardData } from "../services/transactionService";
-
+import { useTranslation } from "react-i18next";
 
 function getUsedPercentage(budget) {
   const used = budget.maxSpending - budget.availableBudget;
@@ -18,8 +18,8 @@ function getBudgetBarColor(budget) {
   return "bg-red-500";
 }
 
-
 export default function Dashboard() {
+  const { t } = useTranslation("dashboard");
   const { token } = useAuth();
   const navigate = useNavigate();
 
@@ -30,104 +30,92 @@ export default function Dashboard() {
   const [monthlyExpenses, setMonthlyExpenses] = useState(0);
 
   useEffect(() => {
-  async function fetchData() {
-    try {
-      const data = await getDashboardData();
-      setBalance(data.balance);
-      setMonthlyExpenses(data.currentMonthExpenses);
-      setTransactions(data.recentTransactions || []);
-      setBudget({
-        maxSpending: data.maxSpending,
-        availableBudget: data.availableBudget
-      });
-
-    } catch (error) {
-      console.error("Failed to load dashboard data", error);
-    } finally {
-      setLoading(false);
+    async function fetchData() {
+      try {
+        const data = await getDashboardData();
+        setBalance(data.balance);
+        setMonthlyExpenses(data.currentMonthExpenses);
+        setTransactions(data.recentTransactions || []);
+        setBudget({
+          maxSpending: data.maxSpending,
+          availableBudget: data.availableBudget,
+        });
+      } catch (error) {
+        console.error("Failed to load dashboard data", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  }
+    fetchData();
+  }, [token]);
 
-  fetchData();
-}, [token]);
-
-  if (loading) return <p className="p-6">Loading dashboard...</p>;
+  if (loading) return <p className="p-6">{t("loading")}</p>;
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard</h1>
+      <h1 className="text-2xl font-bold">{t("title")}</h1>
 
-      {/* RESUMEN */}
+      {/* SUMMARY */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white shadow-md rounded-xl p-4">
-          <h2 className="text-lg font-semibold">Current Balance</h2>
+          <h2 className="text-lg font-semibold">{t("currentBalance")}</h2>
           <p className={`text-2xl font-bold ${balance >= 0 ? "text-green-600" : "text-red-600"}`}>
             {formatCurrency(balance)}
           </p>
         </div>
 
         <div className="bg-white shadow-md rounded-xl p-4">
-          <h2 className="text-lg font-semibold">Spent this month</h2>
+          <h2 className="text-lg font-semibold">{t("spentThisMonth")}</h2>
           <p className="text-2xl font-bold text-red-600">
             {formatCurrency(monthlyExpenses)}
           </p>
         </div>
 
         <div className="bg-white shadow-md rounded-xl p-4 flex flex-col gap-2">
-  <h2 className="text-lg font-semibold">Monthly Limit</h2>
+          <h2 className="text-lg font-semibold">{t("monthlyLimit")}</h2>
 
-  {budget && budget.maxSpending ? (
-    <>
-      <p className="text-2xl font-bold text-blue-600">
-        {formatCurrency(budget.maxSpending)}
-      </p>
-      <p className="text-sm text-gray-600">
-        {formatCurrency(budget.availableBudget)} left this month
-      </p>
+          {budget && budget.maxSpending ? (
+            <>
+              <p className="text-2xl font-bold text-blue-600">
+                {formatCurrency(budget.maxSpending)}
+              </p>
+              <p className="text-sm text-gray-600">
+                {formatCurrency(budget.availableBudget)} {t("leftThisMonth")}
+              </p>
+              <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mt-1">
+                <div
+                  className={`h-full rounded-full ${getBudgetBarColor(budget)}`}
+                  style={{ width: `${getUsedPercentage(budget)}%` }}
+                />
+              </div>
+            </>
+          ) : (
+            <p className="text-2xl font-bold text-blue-600">-</p>
+          )}
 
-      {/* Barra de progreso */}
-      <div className="w-full h-3 bg-gray-200 rounded-full overflow-hidden mt-1">
-        <div
-          className={`
-            h-full rounded-full transition-all duration-300
-            ${getBudgetBarColor(budget)}
-          `}
-          style={{
-            width: `${getUsedPercentage(budget)}%`,
-          }}
-        />
+          <button
+            onClick={() => navigate("/budgets/new")}
+            className="mt-3 bg-blue-600 text-white text-sm px-4 py-2 rounded self-start"
+          >
+            {t("setBudget")}
+          </button>
         </div>
-      </>
-      ) : (
-      <p className="text-2xl font-bold text-blue-600">-</p>
-    )}
-
-      <button
-        onClick={() => navigate("/budgets/new")}
-        className="mt-3 bg-blue-600 text-white text-sm px-4 py-2 rounded self-start"
-      >
-        Set Monthly Budget
-      </button>
       </div>
 
-        </div>
-
-  
-
-      {/* ÚLTIMAS TRANSACCIONES */}
+      {/* LATEST TRANSACTIONS */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="text-xl font-semibold">Latest Transactions</h2>
+          <h2 className="text-xl font-semibold">{t("latestTransactions")}</h2>
           <button
             onClick={() => navigate("/transactions/new")}
             className="bg-green-600 hover:bg-green-700 text-white text-sm px-4 py-2 rounded shadow"
           >
-            ➕ Add Transaction
+            ➕ {t("addTransaction")}
           </button>
         </div>
 
         {transactions.length === 0 ? (
-          <p>No transactions found for this month.</p>
+          <p>{t("noTransactions")}</p>
         ) : (
           <ul className="divide-y">
             {transactions.map((tx) => {
@@ -136,7 +124,7 @@ export default function Dashboard() {
               const amountClass = isIncome ? "text-green-600" : "text-red-600";
               const categoryName = tx.category?.emoji
                 ? `${tx.category.emoji} ${tx.category.name}`
-                : tx.category?.name || "Uncategorized";
+                : tx.category?.name || t("uncategorized");
               const dateFormatted = new Date(tx.date).toLocaleDateString();
 
               return (
@@ -161,7 +149,7 @@ export default function Dashboard() {
           onClick={() => navigate("/transactions")}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
         >
-        📋 View all transactions
+          📋 {t("viewAll")}
         </button>
       </div>
     </div>

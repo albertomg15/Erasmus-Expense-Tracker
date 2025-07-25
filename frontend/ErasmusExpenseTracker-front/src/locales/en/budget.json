@@ -1,0 +1,47 @@
+{
+  "editTitle": "Edit Monthly Budget",
+  "newTitle": "New Monthly Budget",
+  "month": "Month",
+  "year": "Year",
+  "maxSpending": "Max Spending (€)",
+  "warningThreshold": "Warning Threshold (€)",
+  "tooltipMax": "Estimated amount you plan to spend during the selected month.",
+  "tooltipWarning": "You'll receive an alert when your expenses reach this amount.",
+  "save": "Save Budget",
+  "update": "Update Budget",
+  "cancel": "Cancel",
+  "createdSuccess": "Budget created successfully.",
+  "updatedSuccess": "Budget updated successfully.",
+  "deletedSuccess": "Budget deleted successfully.",
+  "loadError": "Failed to load budget.",
+  "createError": "Error creating budget.",
+  "updateError": "Error updating budget.",
+  "deleteError": "Failed to delete budget.",
+  "validation": {
+    "required": "Month and Year are required.",
+    "invalidNumbers": "Budget values must be valid numbers.",
+    "threshold": "Max spending must be bigger than warning threshold."
+  },
+  "listTitle": "📅 Monthly Budgets",
+  "addButton": "➕ Add Budget",
+  "filterYear": "Filter by year:",
+  "sortBy": "Sort by:",
+  "sort": {
+    "month": "Month",
+    "maxSpending": "Max Spending",
+    "spent": "Spent"
+  },
+  "table": {
+    "month": "Month",
+    "year": "Year",
+    "max": "Max Spending (€)",
+    "warning": "Warning Threshold (€)",
+    "actions": "Actions",
+    "progress": "Progress",
+    "edit": "✏️ Edit",
+    "delete": "🗑️ Delete",
+    "confirmDelete": "Are you sure you want to delete this budget?"
+  },
+  "allYears": "All Years"
+
+}

@@ -4,6 +4,8 @@ import App from "./App.jsx";
 import { AuthProvider } from "./context/AuthContext";
 import { Toaster } from 'react-hot-toast';
 import './index.css';
+import "./i18n";
+
 
 
 ReactDOM.createRoot(document.getElementById("root")).render(
