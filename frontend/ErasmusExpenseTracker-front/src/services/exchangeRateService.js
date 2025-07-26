@@ -1,32 +1,42 @@
-// services/exchangeRateService.js
 import { API_BASE_URL, getAuthHeaders } from "./config";
 
-export const getExchangeRates = async () => {
-  const res = await fetch(`${API_BASE_URL}/api/exchange-rates`, {
-    headers: getAuthHeaders(),
-  });
-  return res.json();
-};
-
-export const getExchangeRateById = async (id) => {
-  const res = await fetch(`${API_BASE_URL}/api/exchange-rates/${id}`, {
-    headers: getAuthHeaders(),
-  });
-  return res.json();
-};
-
-export const createExchangeRate = async (rate) => {
-  const res = await fetch(`${API_BASE_URL}/api/exchange-rates`, {
+/**
+ * Convierte una cantidad de una moneda a otra usando la API backend.
+ */
+export const convertCurrency = async ({ amount, fromCurrency, toCurrency }) => {
+  const res = await fetch(`${API_BASE_URL}/api/exchange-rates/convert`, {
     method: "POST",
-    headers: getAuthHeaders(),
-    body: JSON.stringify(rate),
+    headers: {
+      ...getAuthHeaders(),
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      amount,
+      fromCurrency,
+      toCurrency,
+    }),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Currency conversion failed: ${res.status} - ${text}`);
+  }
+
   return res.json();
 };
 
-export const deleteExchangeRate = async (id) => {
-  return fetch(`${API_BASE_URL}/api/exchange-rates/${id}`, {
-    method: "DELETE",
+/**
+ * Obtiene la lista de monedas soportadas por la aplicación.
+ */
+export const getSupportedCurrencies = async () => {
+  const res = await fetch(`${API_BASE_URL}/api/currencies`, {
     headers: getAuthHeaders(),
   });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`Failed to fetch supported currencies: ${res.status} - ${text}`);
+  }
+
+  return res.json(); // Lista tipo ["EUR", "USD", "GBP", ...]
 };

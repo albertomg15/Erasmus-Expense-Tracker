@@ -19,5 +19,7 @@
   "updateError": "Error al actualizar los datos.",
   "passwordMismatch": "Las nuevas contraseñas no coinciden.",
   "passwordSuccess": "Contraseña actualizada correctamente.",
-  "passwordError": "Error al cambiar la contraseña."
+  "passwordError": "Error al cambiar la contraseña.",
+  "selectCurrency": "Selecciona una moneda"
+
 }

@@ -4,6 +4,9 @@ import { useNavigate } from "react-router-dom";
 import { formatCurrency } from "../utils/formatters";
 import { getDashboardData } from "../services/transactionService";
 import { useTranslation } from "react-i18next";
+import { getCurrencySymbol } from "../utils/formatters";
+import { formatAmountOnly } from "../utils/formatters";
+
 
 function getUsedPercentage(budget) {
   const used = budget.maxSpending - budget.availableBudget;
@@ -120,12 +123,21 @@ export default function Dashboard() {
           <ul className="divide-y">
             {transactions.map((tx) => {
               const isIncome = tx.type === "INCOME";
-              const amountFormatted = `${isIncome ? "+" : "-"}${formatCurrency(tx.amount)}`;
+              const originalSign = isIncome ? "+" : "-";
+
+              const originalAmount = `${originalSign}${formatAmountOnly(tx.amount)} ${getCurrencySymbol(tx.currency)}`;
+              const convertedAmount = `${originalSign}${getCurrencySymbol(tx.convertedCurrency)}${formatCurrency(tx.convertedAmount)}`;
+
               const amountClass = isIncome ? "text-green-600" : "text-red-600";
-              const categoryName = tx.category?.emoji
-                ? `${tx.category.emoji} ${tx.category.name}`
-                : tx.category?.name || t("uncategorized");
+
+              const categoryName = tx.categoryEmoji
+              ? `${tx.categoryEmoji} ${tx.categoryName || t("uncategorized")}`
+              : tx.categoryName || t("uncategorized");
+
+
               const dateFormatted = new Date(tx.date).toLocaleDateString();
+
+              const showConversion = tx.currency !== tx.convertedCurrency;
 
               return (
                 <li key={tx.transactionId} className="py-3 flex justify-between items-center">
@@ -134,13 +146,20 @@ export default function Dashboard() {
                     <span className="text-sm text-gray-500">({categoryName})</span>
                   </div>
                   <div className="text-right">
-                    <div className={`font-semibold ${amountClass}`}>{amountFormatted}</div>
+                    <div className={`font-semibold ${amountClass}`}>{originalAmount}</div>
+                    {showConversion && (
+                      <div className="text-xs text-gray-500">
+                        ≈ {convertedAmount}
+                      </div>
+                    )}
                     <div className="text-xs text-gray-500">{dateFormatted}</div>
                   </div>
                 </li>
               );
             })}
           </ul>
+
+
         )}
       </div>
 

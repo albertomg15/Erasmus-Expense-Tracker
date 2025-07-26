@@ -18,4 +18,6 @@ public class AnnualSummaryDto {
     private BigDecimal totalSaving;
     private Map<String, BigDecimal> incomeByCategory;
     private Map<String, BigDecimal> expenseByCategory;
+    private String convertedCurrency; // NUEVO campo
+
 }

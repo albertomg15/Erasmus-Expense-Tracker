@@ -1,15 +1,13 @@
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip } from "recharts";
-import { useTranslation } from "react-i18next";
+import { formatCurrency } from "../../utils/formatters"; // ajusta la ruta si es necesario
 
 const COLORS = [
   "#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#B10DC9",
   "#FF4136", "#2ECC40", "#0074D9", "#FFDC00", "#AAAAAA",
 ];
 
-const CategoryPieChart = ({ data }) => {
-  const { t } = useTranslation("statistics");
-
+const CategoryPieChart = ({ data, currency = "EUR" }) => {
   const chartData = Object.entries(data).map(([name, value]) => ({
     name,
     value: parseFloat(value),
@@ -53,13 +51,12 @@ const CategoryPieChart = ({ data }) => {
             labelLine={false}
           >
             {chartData.map((entry, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={COLORS[index % COLORS.length]}
-              />
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Tooltip />
+          <Tooltip
+            formatter={(value) => formatCurrency(value, currency)}
+          />
         </PieChart>
       </div>
 
@@ -77,7 +74,7 @@ const CategoryPieChart = ({ data }) => {
                   {entry.name} ({percent}%)
                 </span>
                 <span className="text-gray-500 whitespace-nowrap">
-                  ({entry.value.toFixed(2)}€)
+                  ({formatCurrency(entry.value, currency)})
                 </span>
               </li>
             );

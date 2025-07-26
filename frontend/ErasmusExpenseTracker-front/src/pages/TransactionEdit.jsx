@@ -14,6 +14,8 @@ import { useAuth } from "../context/AuthContext";
 import { toast } from "react-hot-toast";
 import { parseJwt } from "../utils/tokenUtils";
 import { useTranslation } from "react-i18next";
+import { getSupportedCurrencies } from "../services/exchangeRateService";
+
 
 
 export default function TransactionEdit() {
@@ -28,11 +30,22 @@ export default function TransactionEdit() {
   const [categories, setCategories] = useState([]);
   const [trips, setTrips] = useState([]);
   const [saving, setSaving] = useState(false);
+    const [availableCurrencies, setAvailableCurrencies] = useState([]);
+
 
   useEffect(() => {
-    async function fetchTransaction() {
+    async function fetchData() {
       try {
-        const normal = await getTransactionById(id);
+        const [normal, currencies, cats, tripsData] = await Promise.all([
+          getTransactionById(id),
+          getSupportedCurrencies(),
+          getAllCategoriesByUserId(userId),
+          getTripsByUserId(userId)
+        ]);
+        setAvailableCurrencies(currencies || []);
+        setCategories(cats || []);
+        setTrips(tripsData || []);
+
         if (normal.recurrencePattern) {
           const recurring = await getRecurringTransactionById(id);
           setForm({ ...recurring });
@@ -47,15 +60,9 @@ export default function TransactionEdit() {
       }
     }
 
-    if (id) fetchTransaction();
-  }, [id, navigate]);
+    if (id && token) fetchData();
+  }, [id, token, userId, navigate]);
 
-  useEffect(() => {
-    if (token) {
-      getAllCategoriesByUserId(userId).then(setCategories);
-      getTripsByUserId(userId).then(setTrips);
-    }
-  }, [token]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -124,7 +131,19 @@ export default function TransactionEdit() {
 
         <div>
           <label className="block mb-1 font-medium">{t("currency")}</label>
-          <input name="currency" value={form.currency} onChange={handleChange} className="w-full p-2 border rounded" />
+          <select
+            name="currency"
+            value={form.currency}
+            onChange={handleChange}
+            required
+            className="w-full p-2 border rounded"
+          >
+            {availableCurrencies.map((cur) => (
+              <option key={cur} value={cur}>
+                {cur}
+              </option>
+            ))}
+          </select>        
         </div>
 
         <div>

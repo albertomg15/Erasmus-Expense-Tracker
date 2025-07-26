@@ -14,7 +14,7 @@
   "description": "Description",
   "descriptionOptional": "Description (optional)",
   "tripOptional": "Trip (optional)",
-  "associatedTripOptional": "Associated Trip (optional)",
+  "associatedTripOptional": "Associated Trip ",
   "none": "-- None --",
   "recurrencePattern": "Recurrence Pattern",
   "daily": "Daily",
@@ -64,7 +64,8 @@
     "allKinds": "All kinds",
     "regularOnly": "Regular only",
     "recurringOnly": "Recurring only",
-    "allTrips": "All trips"
+    "allTrips": "All trips",
+    "allCategories": "All categories"
   },
   "sort": {
     "newestFirst": "Newest first",

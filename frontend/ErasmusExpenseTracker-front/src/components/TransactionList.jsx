@@ -42,7 +42,8 @@ export default function TransactionList({ transactions, onDelete }) {
             ? tx.active
               ? `${t("nextExecution")}: ${new Date(tx.nextExecution).toLocaleDateString()}`
               : t("cancelled", { defaultValue: "Cancelled" })
-            : `${isIncome ? "+" : "-"}${formatCurrency(tx.amount)}`;
+            : `${isIncome ? "+" : "-"}${formatCurrency(tx.amount, tx.currency)
+}`;
 
           const amountClass = isRecurring
             ? tx.active
@@ -72,6 +73,14 @@ export default function TransactionList({ transactions, onDelete }) {
               </div>
               <div className="text-right">
                 <div className={`font-semibold ${amountClass}`}>{amountFormatted}</div>
+
+                  {/* Mostramos conversión si hay diferencia de moneda */}
+                  {tx.currency !== tx.convertedCurrency && tx.convertedAmount != null && (
+                    <div className="text-xs text-gray-500 italic">
+                      ≈ {formatCurrency(tx.convertedAmount, tx.convertedCurrency)}
+                    </div>
+                  )}
+
                 <div className="text-xs text-gray-500">{dateFormatted}</div>
               </div>
             </li>
@@ -91,7 +100,7 @@ export default function TransactionList({ transactions, onDelete }) {
             <h2 className="text-xl font-bold mb-4">{t("details", { defaultValue: "Transaction Details" })}</h2>
             <div className="space-y-2 text-sm">
               <div><strong>{t("description")}:</strong> {selectedTransaction.description}</div>
-              <div><strong>{t("amount")}:</strong> {formatCurrency(selectedTransaction.amount)} {selectedTransaction.currency}</div>
+              <div><strong>{t("amount")}:</strong> {formatCurrency(selectedTransaction.amount, selectedTransaction.currency)}</div>
               <div><strong>{t("type")}:</strong> {t(selectedTransaction.type.toLowerCase())}</div>
               <div><strong>{t("date")}:</strong> {new Date(selectedTransaction.date).toLocaleDateString()}</div>
               <div><strong>{t("category")}:</strong> {selectedTransaction.category?.name || t("uncategorized")}</div>
@@ -114,6 +123,8 @@ export default function TransactionList({ transactions, onDelete }) {
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => {
+                  console.log("Selected transaction:", selectedTransaction);
+
                   window.location.href = `/transactions/edit/${selectedTransaction.transactionId}`;
                 }}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"

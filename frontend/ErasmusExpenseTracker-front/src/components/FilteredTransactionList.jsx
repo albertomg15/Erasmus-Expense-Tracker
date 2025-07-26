@@ -98,6 +98,20 @@ export default function FilteredTransactionList() {
         ))}
       </select>
 
+          <select
+      value={categoryFilter}
+      onChange={(e) => setCategoryFilter(e.target.value)}
+      className="p-2 border rounded"
+    >
+      <option value="ALL">{t("filter.allCategories")}</option>
+      {categories.map((cat) => (
+        <option key={cat.categoryId} value={cat.name}>
+          {cat.name}
+        </option>
+      ))}
+    </select>
+
+
       <select value={recurrenceFilter} onChange={(e) => setRecurrenceFilter(e.target.value)} className="p-2 border rounded">
         <option value="ALL">{t("filter.allKinds")}</option>
         <option value="REGULAR">{t("filter.regularOnly")}</option>

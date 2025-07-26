@@ -1,16 +1,16 @@
 export default class ExchangeRate {
-  constructor({ rateId, fromCurrency, toCurrency, rate, timestamp }) {
+  constructor({ rateId, fromCurrency, toCurrency, rate, date }) {
     this.rateId = rateId;
     this.fromCurrency = fromCurrency;
     this.toCurrency = toCurrency;
     this.rate = parseFloat(rate);
-    this.timestamp = new Date(timestamp);
+    this.date = new Date(date); // LocalDate desde backend (yyyy-MM-dd)
   }
 
-  isExpired(minutes = 60) {
+  isExpired(days = 1) {
     const now = new Date();
-    const diffMs = now - this.timestamp;
-    return diffMs > minutes * 60 * 1000;
+    const diffMs = now - this.date;
+    return diffMs > days * 24 * 60 * 60 * 1000;
   }
 
   formattedRate() {

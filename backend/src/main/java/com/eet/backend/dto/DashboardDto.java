@@ -14,5 +14,5 @@ public class DashboardDto {
     private BigDecimal currentMonthExpenses;
     private BigDecimal maxSpending;
     private BigDecimal availableBudget;
-    private List<Transaction> recentTransactions;
+    private List<TransactionDto> recentTransactions;
 }

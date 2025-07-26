@@ -1,12 +1,9 @@
 package com.eet.backend.controller;
 
-import com.eet.backend.dto.DashboardDto;
-import com.eet.backend.dto.SummaryDto;
-import com.eet.backend.dto.TransactionDto;
+import com.eet.backend.dto.*;
 import com.eet.backend.model.*;
-import com.eet.backend.service.BudgetService;
-import com.eet.backend.service.TransactionService;
-import com.eet.backend.service.UserService;
+import com.eet.backend.service.*;
+//import com.eet.backend.service.ExchangeRateInitializer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -17,8 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;import com.eet.backend.dto.TransactionRequestDto; // Asegúrate de importar esto
-
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -28,6 +24,8 @@ public class TransactionController {
     private final TransactionService transactionService;
     private final UserService userService;
     private final BudgetService budgetService;
+    private final ExchangeRateService exchangeRateService;
+   // private final ExchangeRateInitializer exchangeRateInitializer;
 
     // ==================== UTIL ====================
     private User getAuthenticatedUser(UserDetails userDetails) {
@@ -38,29 +36,30 @@ public class TransactionController {
     // ==================== CRUD ====================
     @GetMapping
     public ResponseEntity<List<TransactionDto>> getAllTransactions(@AuthenticationPrincipal UserDetails userDetails) {
-        List<Transaction> transactions = transactionService.getAllByUserId(getAuthenticatedUser(userDetails).getUserId());
+        User user = getAuthenticatedUser(userDetails);
+        List<Transaction> transactions = transactionService.getAllByUserId(user.getUserId());
 
         List<TransactionDto> dtos = transactions.stream()
-                .map(this::toDto)
+                .map(tx -> toDto(tx, user))
                 .toList();
 
         return ResponseEntity.ok(dtos);
     }
 
-
     @GetMapping("/{id}")
-    public ResponseEntity<Transaction> getTransactionById(@PathVariable UUID id) {
+    public ResponseEntity<TransactionDto> getTransactionById(@PathVariable UUID id,
+                                                             @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
+
         return transactionService.getById(id)
-                .map(ResponseEntity::ok)
+                .map(tx -> ResponseEntity.ok(toDto(tx, user)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
     public ResponseEntity<Transaction> createTransaction(@RequestBody TransactionRequestDto dto,
                                                          @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
+        User user = getAuthenticatedUser(userDetails);
         Transaction transaction = toEntity(dto, user);
         Transaction saved = transactionService.save(transaction);
         return ResponseEntity.ok(saved);
@@ -70,10 +69,7 @@ public class TransactionController {
     public ResponseEntity<Transaction> updateTransaction(@PathVariable UUID id,
                                                          @RequestBody TransactionRequestDto dto,
                                                          @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-        // Lo convertimos a entidad base para pasar a service.update(...)
+        User user = getAuthenticatedUser(userDetails);
         Transaction base = toEntity(dto, user);
 
         return transactionService.update(id, base, user)
@@ -90,15 +86,21 @@ public class TransactionController {
     // ==================== RESÚMENES ====================
     @GetMapping("/summary")
     public ResponseEntity<SummaryDto> getSummary(@AuthenticationPrincipal UserDetails userDetails) {
-        return ResponseEntity.ok(transactionService.getSummary(getAuthenticatedUser(userDetails)));
+        User user = getAuthenticatedUser(userDetails);
+        return ResponseEntity.ok(transactionService.getSummary(user));
     }
 
     @GetMapping("/recent")
-    public ResponseEntity<List<Transaction>> getRecentTransactions(
+    public ResponseEntity<List<TransactionDto>> getRecentTransactions(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "5") int limit
-    ) {
-        return ResponseEntity.ok(transactionService.getRecentByUser(getAuthenticatedUser(userDetails), limit));
+            @RequestParam(defaultValue = "5") int limit) {
+
+        User user = getAuthenticatedUser(userDetails);
+        List<TransactionDto> dtos = transactionService.getRecentByUser(user, limit).stream()
+                .map(tx -> toDto(tx, user))
+                .toList();
+
+        return ResponseEntity.ok(dtos);
     }
 
     @GetMapping("/dashboard")
@@ -107,6 +109,8 @@ public class TransactionController {
 
         BigDecimal balance = transactionService.getBalance(user);
         BigDecimal currentExpenses = transactionService.getCurrentMonthExpenses(user);
+       // exchangeRateInitializer.ensureRatesFrom(user.getPreferredCurrency());
+
 
         Optional<Budget> monthlyBudget = budgetService.getMonthlyBudget(
                 user.getUserId(),
@@ -117,22 +121,28 @@ public class TransactionController {
         BigDecimal maxSpending = monthlyBudget.map(Budget::getMaxSpending).orElse(null);
         BigDecimal availableBudget = (maxSpending != null) ? maxSpending.subtract(currentExpenses) : null;
 
+        List<TransactionDto> recentDtos = transactionService.getRecentByUser(user, 5)
+                .stream()
+                .map(tx -> toDto(tx, user))
+                .toList();
+
         DashboardDto dto = new DashboardDto(
                 balance,
                 currentExpenses,
                 maxSpending,
                 availableBudget,
-                transactionService.getRecentByUser(user, 5)
+                recentDtos
         );
 
         return ResponseEntity.ok(dto);
     }
 
+
+
     // ==================== RECURRENTES ====================
     @PostMapping("/process-recurring")
     public ResponseEntity<String> processRecurringTransactionsManually(
-            @AuthenticationPrincipal UserDetails userDetails
-    ) {
+            @AuthenticationPrincipal UserDetails userDetails) {
         getAuthenticatedUser(userDetails); // valida usuario
         int processed = transactionService.processDueRecurringTransactions();
         return ResponseEntity.ok("Processed " + processed + " recurring transactions.");
@@ -140,29 +150,43 @@ public class TransactionController {
 
     // ==================== TRIP RELACIONADO ====================
     @GetMapping("/trip/{tripId}")
-    public ResponseEntity<List<TransactionDto>> getByTripId(@PathVariable UUID tripId) {
+    public ResponseEntity<List<TransactionDto>> getByTripId(@PathVariable UUID tripId,
+                                                            @AuthenticationPrincipal UserDetails userDetails) {
+        User user = getAuthenticatedUser(userDetails);
         return ResponseEntity.ok(
                 transactionService.getByTripId(tripId)
                         .stream()
-                        .map(this::toDto)
+                        .map(tx -> toDto(tx, user))
                         .toList()
         );
     }
 
     // ==================== DTO CONVERTER ====================
-    private TransactionDto toDto(Transaction tx) {
+    private TransactionDto toDto(Transaction tx, User user) {
+        ExchangeRate rate = exchangeRateService.getRate(
+                tx.getCurrency(), user.getPreferredCurrency()
+        ).orElseThrow(() -> new RuntimeException("Missing exchange rate for: "
+                + tx.getCurrency() + " → " + user.getPreferredCurrency()));
+
+        BigDecimal convertedAmount = tx.getAmount().multiply(rate.getRate());
+
         return TransactionDto.builder()
                 .transactionId(tx.getTransactionId())
-                .type(tx.getType().name())
+                .type(tx.getType() != null ? tx.getType().name() : null)
                 .amount(tx.getAmount())
                 .currency(tx.getCurrency())
-                .categoryName(tx.getCategory().getName())
-                .categoryEmoji(tx.getCategory().getEmoji())
+                .convertedAmount(convertedAmount)
+                .convertedCurrency(user.getPreferredCurrency())
+                .categoryName(tx.getCategory() != null ? tx.getCategory().getName() : null)
+                .categoryEmoji(tx.getCategory() != null ? tx.getCategory().getEmoji() : null)
                 .date(tx.getDate())
                 .description(tx.getDescription())
                 .tripId(tx.getTrip() != null ? tx.getTrip().getTripId() : null)
+                .tripName(tx.getTrip() != null ? tx.getTrip().getName() : null)
                 .build();
     }
+
+
 
     private Transaction toEntity(TransactionRequestDto dto, User user) {
         Transaction.TransactionBuilder builder = Transaction.builder()
@@ -183,5 +207,4 @@ public class TransactionController {
 
         return builder.build();
     }
-
 }

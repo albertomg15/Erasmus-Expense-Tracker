@@ -1,5 +1,6 @@
 package com.eet.backend.model;
 
+import com.eet.backend.validation.ValidCurrency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;

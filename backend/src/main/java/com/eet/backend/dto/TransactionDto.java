@@ -21,6 +21,9 @@ public class TransactionDto {
     private String description;
     private UUID tripId;
     private String tripName; // nuevo campo opcional
+    private BigDecimal convertedAmount; // cantidad en moneda preferida del usuario
+    private String convertedCurrency;   // ISO de la moneda preferida
+
 
 }
 

@@ -47,4 +47,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, UUID> 
 
     List<Transaction> findByUserIdAndTrip_TripIdAndType(UUID userId, UUID tripId, TransactionType type);
 
+    List<Transaction> findByUserAndTypeAndDateBetween(User user, TransactionType transactionType, LocalDate startOfMonth, LocalDate endOfMonth);
 }

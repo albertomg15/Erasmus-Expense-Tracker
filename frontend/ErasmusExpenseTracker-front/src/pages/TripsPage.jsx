@@ -6,11 +6,13 @@ import { toast } from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 
 
+
 export default function TripsPage() {
   const { token } = useAuth();
   const navigate = useNavigate();
   const [trips, setTrips] = useState([]);
     const { t } = useTranslation("trips");
+
 
 
   useEffect(() => {
@@ -27,6 +29,9 @@ export default function TripsPage() {
 
     if (token) fetchTrips();
   }, [token]);
+
+  
+
 
   return (
     <div className="p-6 max-w-6xl mx-auto">

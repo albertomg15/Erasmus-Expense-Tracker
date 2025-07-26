@@ -22,10 +22,14 @@ public class StatsService {
     private final BudgetRepository budgetRepository;
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
+    private final ExchangeRateService exchangeRateService;
+
 
     public MonthlySummaryDto getMonthlySummary(UUID userId, Integer month, Integer year) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String preferredCurrency = user.getPreferredCurrency();
 
         YearMonth target = (month != null && year != null)
                 ? YearMonth.of(year, month)
@@ -41,15 +45,19 @@ public class StatsService {
         Map<String, BigDecimal> expensesByCategory = new HashMap<>();
 
         for (Transaction tx : transactions) {
-            BigDecimal amount = tx.getAmount();
+            BigDecimal originalAmount = tx.getAmount();
+            String txCurrency = tx.getCurrency();
+
+            BigDecimal convertedAmount = txCurrency.equals(preferredCurrency)
+                    ? originalAmount
+                    : exchangeRateService.convert(originalAmount, txCurrency, preferredCurrency);
+
             if (tx.getType() == TransactionType.INCOME) {
-                totalIncome = totalIncome.add(amount);
-            } else if (tx.getType() == TransactionType.EXPENSE) {
-                totalExpense = totalExpense.add(amount);
-                String key = tx.getCategory().getEmoji() != null
-                        ? tx.getCategory().getEmoji() + " " + tx.getCategory().getName()
-                        : tx.getCategory().getName();
-                expensesByCategory.merge(key, amount, BigDecimal::add);
+                totalIncome = totalIncome.add(convertedAmount);
+            } else {
+                totalExpense = totalExpense.add(convertedAmount);
+                String key = (tx.getCategory().getEmoji() != null ? tx.getCategory().getEmoji() + " " : "") + tx.getCategory().getName();
+                expensesByCategory.merge(key, convertedAmount, BigDecimal::add);
             }
         }
 
@@ -69,18 +77,21 @@ public class StatsService {
                 .monthlyBudget(monthlyBudget)
                 .budgetUsedPercent(percentUsed)
                 .expensesByCategory(expensesByCategory)
+                .convertedCurrency(preferredCurrency) // <-- nuevo campo
                 .build();
     }
 
 
     public List<MonthlyEvolutionEntryDto> getMonthlyEvolution(UUID userId, int monthsBack) {
-        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        String preferredCurrency = user.getPreferredCurrency();
         LocalDate now = LocalDate.now();
         LocalDate startDate = now.minusMonths(monthsBack - 1).withDayOfMonth(1);
 
         List<Transaction> transactions = transactionRepository.findByUserAndDateAfter(user, startDate);
 
-        // Map<YearMonth, List<Transaction>>
         Map<YearMonth, List<Transaction>> grouped = transactions.stream()
                 .collect(Collectors.groupingBy(tx -> YearMonth.from(tx.getDate())));
 
@@ -90,15 +101,23 @@ public class StatsService {
             YearMonth ym = YearMonth.now().minusMonths(monthsBack - 1 - i);
             List<Transaction> monthTxs = grouped.getOrDefault(ym, List.of());
 
-            BigDecimal income = monthTxs.stream()
-                    .filter(t -> t.getType() == TransactionType.INCOME)
-                    .map(Transaction::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal income = BigDecimal.ZERO;
+            BigDecimal expense = BigDecimal.ZERO;
 
-            BigDecimal expense = monthTxs.stream()
-                    .filter(t -> t.getType() == TransactionType.EXPENSE)
-                    .map(Transaction::getAmount)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            for (Transaction tx : monthTxs) {
+                BigDecimal originalAmount = tx.getAmount();
+                String txCurrency = tx.getCurrency();
+
+                BigDecimal convertedAmount = txCurrency.equals(preferredCurrency)
+                        ? originalAmount
+                        : exchangeRateService.convert(originalAmount, txCurrency, preferredCurrency);
+
+                if (tx.getType() == TransactionType.INCOME) {
+                    income = income.add(convertedAmount);
+                } else if (tx.getType() == TransactionType.EXPENSE) {
+                    expense = expense.add(convertedAmount);
+                }
+            }
 
             result.add(MonthlyEvolutionEntryDto.builder()
                     .month(ym.toString()) // YYYY-MM
@@ -111,7 +130,11 @@ public class StatsService {
         return result;
     }
 
+
     public IncomeVsExpenseDto getIncomeVsExpense(UUID userId, int month, int year) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        String preferredCurrency = user.getPreferredCurrency();
+
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
@@ -123,15 +146,21 @@ public class StatsService {
         BigDecimal totalExpense = BigDecimal.ZERO;
 
         for (Transaction tx : transactions) {
+            BigDecimal originalAmount = tx.getAmount();
+            String txCurrency = tx.getCurrency();
+
+            BigDecimal convertedAmount = txCurrency.equals(preferredCurrency)
+                    ? originalAmount
+                    : exchangeRateService.convert(originalAmount, txCurrency, preferredCurrency);
+
             String categoryName = tx.getCategory() != null ? tx.getCategory().getName() : "Uncategorized";
-            BigDecimal amount = tx.getAmount();
 
             if (tx.getType() == TransactionType.INCOME) {
-                incomeByCategory.merge(categoryName, amount, BigDecimal::add);
-                totalIncome = totalIncome.add(amount);
+                incomeByCategory.merge(categoryName, convertedAmount, BigDecimal::add);
+                totalIncome = totalIncome.add(convertedAmount);
             } else if (tx.getType() == TransactionType.EXPENSE) {
-                expenseByCategory.merge(categoryName, amount, BigDecimal::add);
-                totalExpense = totalExpense.add(amount);
+                expenseByCategory.merge(categoryName, convertedAmount, BigDecimal::add);
+                totalExpense = totalExpense.add(convertedAmount);
             }
         }
 
@@ -143,7 +172,12 @@ public class StatsService {
                 .build();
     }
 
+
     public List<MonthlyComparisonDto> getMonthlyComparison(UUID userId, int monthsBack) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String preferredCurrency = user.getPreferredCurrency();
+
         LocalDate now = LocalDate.now();
         List<MonthlyComparisonDto> results = new ArrayList<>();
 
@@ -154,8 +188,7 @@ public class StatsService {
             LocalDate start = LocalDate.of(year, month, 1);
             LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-            List<Transaction> transactions = transactionRepository
-                    .findByUserUserIdAndDateBetween(userId, start, end);
+            List<Transaction> transactions = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end);
 
             BigDecimal totalIncome = BigDecimal.ZERO;
             BigDecimal totalExpense = BigDecimal.ZERO;
@@ -163,15 +196,21 @@ public class StatsService {
             Map<String, BigDecimal> expenseByCategory = new HashMap<>();
 
             for (Transaction tx : transactions) {
+                BigDecimal originalAmount = tx.getAmount();
+                String txCurrency = tx.getCurrency();
+
+                BigDecimal convertedAmount = txCurrency.equals(preferredCurrency)
+                        ? originalAmount
+                        : exchangeRateService.convert(originalAmount, txCurrency, preferredCurrency);
+
                 String category = tx.getCategory() != null ? tx.getCategory().getName() : "Uncategorized";
-                BigDecimal amount = tx.getAmount();
 
                 if (tx.getType() == TransactionType.INCOME) {
-                    totalIncome = totalIncome.add(amount);
-                    incomeByCategory.merge(category, amount, BigDecimal::add);
+                    totalIncome = totalIncome.add(convertedAmount);
+                    incomeByCategory.merge(category, convertedAmount, BigDecimal::add);
                 } else if (tx.getType() == TransactionType.EXPENSE) {
-                    totalExpense = totalExpense.add(amount);
-                    expenseByCategory.merge(category, amount, BigDecimal::add);
+                    totalExpense = totalExpense.add(convertedAmount);
+                    expenseByCategory.merge(category, convertedAmount, BigDecimal::add);
                 }
             }
 
@@ -185,12 +224,16 @@ public class StatsService {
                     .build());
         }
 
-        // Orden ascendente por fecha
         results.sort(Comparator.comparing((MonthlyComparisonDto dto) -> dto.getYear() * 100 + dto.getMonth()));
         return results;
     }
 
+
     public List<TripSpendingDto> getTripSpending(UUID userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        String preferredCurrency = user.getPreferredCurrency();
+
         List<Trip> trips = tripRepository.findByUserUserId(userId);
         List<TripSpendingDto> result = new ArrayList<>();
 
@@ -202,10 +245,16 @@ public class StatsService {
 
             for (Transaction tx : txs) {
                 if (tx.getType() == TransactionType.EXPENSE) {
-                    BigDecimal amount = tx.getAmount();
-                    total = total.add(amount);
+                    BigDecimal originalAmount = tx.getAmount();
+                    String currency = tx.getCurrency();
+
+                    BigDecimal convertedAmount = currency.equals(preferredCurrency)
+                            ? originalAmount
+                            : exchangeRateService.convert(originalAmount, currency, preferredCurrency);
+
+                    total = total.add(convertedAmount);
                     String category = tx.getCategory() != null ? tx.getCategory().getName() : "Uncategorized";
-                    byCategory.merge(category, amount, BigDecimal::add);
+                    byCategory.merge(category, convertedAmount, BigDecimal::add);
                 }
             }
 
@@ -214,7 +263,7 @@ public class StatsService {
                     .name(trip.getName())
                     .startDate(trip.getStartDate())
                     .endDate(trip.getEndDate())
-                    .currency(txs.stream().findFirst().map(Transaction::getCurrency).orElse("EUR"))
+                    .currency(preferredCurrency) // <- ya normalizado
                     .totalSpent(total)
                     .expenseByCategory(byCategory)
                     .build());
@@ -225,9 +274,13 @@ public class StatsService {
         return result;
     }
 
+
     public AnnualSummaryDto getAnnualSummary(UUID userId, int year) {
         LocalDate start = LocalDate.of(year, 1, 1);
         LocalDate end = LocalDate.of(year, 12, 31);
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        String preferredCurrency = user.getPreferredCurrency();
+
         List<Transaction> txs = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end);
 
         BigDecimal totalIncome = BigDecimal.ZERO;
@@ -236,15 +289,22 @@ public class StatsService {
         Map<String, BigDecimal> expenseByCategory = new HashMap<>();
 
         for (Transaction tx : txs) {
-            BigDecimal amount = tx.getAmount();
+            BigDecimal originalAmount = tx.getAmount();
+            String txCurrency = tx.getCurrency();
+
+            // Convert if needed
+            BigDecimal convertedAmount = txCurrency.equals(preferredCurrency)
+                    ? originalAmount
+                    : exchangeRateService.convert(originalAmount, txCurrency, preferredCurrency);
+
             String category = tx.getCategory() != null ? tx.getCategory().getName() : "Uncategorized";
 
             if (tx.getType() == TransactionType.INCOME) {
-                totalIncome = totalIncome.add(amount);
-                incomeByCategory.merge(category, amount, BigDecimal::add);
+                totalIncome = totalIncome.add(convertedAmount);
+                incomeByCategory.merge(category, convertedAmount, BigDecimal::add);
             } else if (tx.getType() == TransactionType.EXPENSE) {
-                totalExpense = totalExpense.add(amount);
-                expenseByCategory.merge(category, amount, BigDecimal::add);
+                totalExpense = totalExpense.add(convertedAmount);
+                expenseByCategory.merge(category, convertedAmount, BigDecimal::add);
             }
         }
 
@@ -255,8 +315,10 @@ public class StatsService {
                 .totalSaving(totalIncome.subtract(totalExpense))
                 .incomeByCategory(incomeByCategory)
                 .expenseByCategory(expenseByCategory)
+                .convertedCurrency(preferredCurrency)
                 .build();
     }
+
 
     public List<TripSpendingDto> getTripSpendingByUser(UUID userId) {
         List<Trip> trips = tripRepository.findByUserUserId(userId);

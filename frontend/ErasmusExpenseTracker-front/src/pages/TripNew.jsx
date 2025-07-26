@@ -6,6 +6,9 @@ import { toast } from "react-hot-toast";
 import { useAuth } from "../context/AuthContext";
 import TagSelector from "../components/TagSelector";
 import { useTranslation } from "react-i18next";
+import { parseJwt } from "../utils/tokenUtils";
+import { getSupportedCurrencies } from "../services/exchangeRateService";
+
 
 
 
@@ -16,6 +19,7 @@ export default function TripNew() {
   const [availableTags, setAvailableTags] = useState([]);
   const [selectedTags, setSelectedTags] = useState([]);
     const { t } = useTranslation("trips");
+const [availableCurrencies, setAvailableCurrencies] = useState([]);
 
 
   const [form, setForm] = useState({
@@ -40,6 +44,20 @@ export default function TripNew() {
 
     fetchTags();
   }, []);
+
+  useEffect(() => {
+  async function fetchCurrencies() {
+    try {
+      const currencies = await getSupportedCurrencies();
+      setAvailableCurrencies(currencies);
+    } catch (err) {
+      console.error("Error loading currencies", err);
+    }
+  }
+
+  fetchCurrencies();
+}, []);
+
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -113,7 +131,19 @@ export default function TripNew() {
 
         <div>
           <label className="block font-medium mb-1">{t("currency")}</label>
-          <input type="text" name="currency" value={form.currency} onChange={handleChange} required className="w-full p-2 border rounded" />
+            <select
+              name="currency"
+              value={form.currency}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+            >
+              {availableCurrencies.map((cur) => (
+                <option key={cur} value={cur}>
+                  {cur}
+                </option>
+              ))}
+            </select>
         </div>
 
         <div>

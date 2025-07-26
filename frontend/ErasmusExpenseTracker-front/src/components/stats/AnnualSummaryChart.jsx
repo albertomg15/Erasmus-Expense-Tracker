@@ -10,6 +10,7 @@ import {
   Legend,
 } from "recharts";
 import { useTranslation } from "react-i18next";
+import { formatCurrency } from "../../utils/formatters"; // ajusta ruta si hace falta
 
 const AnnualSummaryChart = ({ data }) => {
   const { t } = useTranslation("statistics");
@@ -18,6 +19,8 @@ const AnnualSummaryChart = ({ data }) => {
     console.warn("AnnualSummaryChart: expected object, got", data);
     return <p className="text-red-500">{t("errors.invalidChartData")}</p>;
   }
+
+  const currency = data.convertedCurrency || "EUR";
 
   const chartData = [
     {
@@ -38,7 +41,7 @@ const AnnualSummaryChart = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis />
-          <Tooltip />
+          <Tooltip formatter={(value) => formatCurrency(value, currency)} />
           <Legend />
           <Area type="monotone" dataKey="income" stackId="1" stroke="#10B981" fill="#D1FAE5" name={t("labels.income")} />
           <Area type="monotone" dataKey="expense" stackId="1" stroke="#EF4444" fill="#FECACA" name={t("labels.expense")} />

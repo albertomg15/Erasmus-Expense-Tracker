@@ -17,4 +17,6 @@ public class MonthlySummaryDto {
     private BigDecimal monthlyBudget;
     private BigDecimal budgetUsedPercent;
     private Map<String, BigDecimal> expensesByCategory;
+    private String convertedCurrency;
+
 }

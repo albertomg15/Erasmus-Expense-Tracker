@@ -6,6 +6,7 @@ import com.eet.backend.dto.TripRequestDto;
 import com.eet.backend.model.Transaction;
 import com.eet.backend.model.Trip;
 import com.eet.backend.model.User;
+import com.eet.backend.service.ExchangeRateService;
 import com.eet.backend.service.TagService;
 import com.eet.backend.service.TripService;
 import com.eet.backend.service.UserService;
@@ -15,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,6 +28,8 @@ public class TripController {
     private final TripService tripService;
     private final UserService userService;
     private final TagService tagService;
+    private final ExchangeRateService exchangeRateService;
+
 
     // 🔹 Obtener todos los viajes de un usuario (convertidos a DTO)
     @GetMapping("/user/{userId}")
@@ -71,32 +75,47 @@ public class TripController {
         return ResponseEntity.noContent().build();
     }
 
+
+
+    // ...
     @GetMapping("/{id}/transactions")
-    public ResponseEntity<List<TransactionDto>> getTripTransactions(@PathVariable UUID id) {
+    public ResponseEntity<List<TransactionDto>> getTripTransactions(
+            @PathVariable UUID id,
+            @AuthenticationPrincipal UserDetails userDetails
+    ) {
+        User user = userService.getByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         return tripService.getById(id)
                 .map(trip -> {
                     List<TransactionDto> txs = trip.getTransactions().stream()
-                            .map(this::toTransactionDto)
+                            .map(tx -> toTransactionDto(tx, user)) // ✅
                             .toList();
                     return ResponseEntity.ok(txs);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    private TransactionDto toTransactionDto(Transaction tx) {
+    private TransactionDto toTransactionDto(Transaction tx, User user) {
+        BigDecimal convertedAmount = exchangeRateService.convert(
+                tx.getAmount(), tx.getCurrency(), user.getPreferredCurrency());
+
         return TransactionDto.builder()
                 .transactionId(tx.getTransactionId())
                 .type(tx.getType().name())
                 .amount(tx.getAmount())
                 .currency(tx.getCurrency())
+                .convertedAmount(convertedAmount)
+                .convertedCurrency(user.getPreferredCurrency())
                 .categoryName(tx.getCategory().getName())
                 .categoryEmoji(tx.getCategory().getEmoji())
                 .date(tx.getDate())
                 .description(tx.getDescription())
-                .tripName(tx.getTrip() != null ? tx.getTrip().getName() : null) // ← aquí
-
+                .tripId(tx.getTrip() != null ? tx.getTrip().getTripId() : null)
+                .tripName(tx.getTrip() != null ? tx.getTrip().getName() : null)
                 .build();
     }
+
 
 
     // 🔁 Método auxiliar: convertir de entidad a DTO
@@ -158,9 +177,6 @@ public class TripController {
         System.out.println("User equals: " + userId.equals(existing.getUser().getUserId()));
         System.out.println("UserDetails username: " + userDetails.getUsername());
 
-        if (!existing.getUser().getUserId().equals(userId)) {
-            return ResponseEntity.status(403).build();
-        }
 
         existing.setName(dto.getName());
         existing.setDestination(dto.getDestination());

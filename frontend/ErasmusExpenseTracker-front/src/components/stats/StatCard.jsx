@@ -1,7 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { formatCurrency } from "../../utils/formatters"; // asegúrate de ajustar la ruta si es necesario
 
-const StatCard = ({ title, value, color }) => {
+const StatCard = ({ title, value, color, currency }) => {
   const { t } = useTranslation("statistics");
 
   const colorMap = {
@@ -17,7 +18,7 @@ const StatCard = ({ title, value, color }) => {
         {t(`stat.${title.toLowerCase()}`)}
       </h3>
       <p className={`text-xl font-semibold ${colorMap[color] || colorMap.default}`}>
-        €{value.toFixed(2)}
+        {formatCurrency(value, currency)}
       </p>
     </div>
   );

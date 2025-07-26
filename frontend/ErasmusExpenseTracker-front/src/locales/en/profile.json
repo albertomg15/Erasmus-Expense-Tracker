@@ -19,5 +19,7 @@
   "updateError": "Failed to update data.",
   "passwordMismatch": "New passwords do not match.",
   "passwordSuccess": "Password updated successfully.",
-  "passwordError": "Failed to change password."
+  "passwordError": "Failed to change password.",
+  "selectCurrency": "Select currency"
+
 }

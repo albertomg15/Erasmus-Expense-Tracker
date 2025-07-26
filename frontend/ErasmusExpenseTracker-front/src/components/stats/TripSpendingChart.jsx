@@ -9,8 +9,9 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useTranslation } from "react-i18next";
+import { formatCurrency } from "../../utils/formatters";
 
-const TripSpendingChart = ({ data }) => {
+const TripSpendingChart = ({ data, currency = "EUR" }) => {
   const { t } = useTranslation("statistics");
 
   return (
@@ -23,7 +24,7 @@ const TripSpendingChart = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
           <YAxis type="category" dataKey="tripName" width={120} />
-          <Tooltip />
+          <Tooltip formatter={(value) => formatCurrency(value, currency)} />
           <Bar dataKey="total" fill="#6366F1" name={t("labels.totalSpent")} />
         </BarChart>
       </ResponsiveContainer>

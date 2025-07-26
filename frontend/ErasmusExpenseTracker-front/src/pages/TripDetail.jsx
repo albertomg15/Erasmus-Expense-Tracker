@@ -33,6 +33,7 @@ export default function TripDetail() {
           },
         }));
 
+
         setTrip(tripData);
         setTransactions(txsWithCategory);
       } catch (err) {
@@ -45,8 +46,12 @@ export default function TripDetail() {
   if (!trip) return <p>Loading...</p>;
 
   const totalSpent = transactions
-    .filter((tx) => tx.type === "EXPENSE")
-    .reduce((sum, tx) => sum + tx.amount, 0);
+  .filter((tx) => tx.type === "EXPENSE")
+  .reduce((sum, tx) => {
+    const value = tx.currency === trip.currency ? tx.amount : tx.convertedAmount;
+    return sum + value;
+  }, 0);
+
 
   const pieDataObject = transactions
     .filter((tx) => tx.type === "EXPENSE")

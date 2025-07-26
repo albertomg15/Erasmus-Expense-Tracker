@@ -9,6 +9,8 @@ import CategorySelector from "../components/CategorySelector";
 import { useSearchParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { parseJwt } from "../utils/tokenUtils";
+import { getSupportedCurrencies } from "../services/exchangeRateService";
+
 
 
 
@@ -45,6 +47,8 @@ const redirectTo = searchParams.get("redirectTo");
   });
 
   const [trips, setTrips] = useState([]);
+  const [availableCurrencies, setAvailableCurrencies] = useState([]);
+
 
   useEffect(() => {
   async function fetchTripsAndHandlePreselection() {
@@ -92,9 +96,23 @@ const redirectTo = searchParams.get("redirectTo");
     if (token) fetchCategories();
   }, [token]);
 
-  const handleChange = (e) => {
+  useEffect(() => {
+  async function fetchCurrencies() {
+    try {
+      const currencies = await getSupportedCurrencies();
+      setAvailableCurrencies(currencies);
+    } catch (err) {
+      console.error("Error loading currencies", err);
+    }
+  }
+
+  fetchCurrencies();
+}, []);
+
+
+   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e) => {
@@ -192,7 +210,19 @@ const redirectTo = searchParams.get("redirectTo");
 
         <div>
           <label className="block mb-1 font-medium">{t("currency")}</label>
-          <input name="currency" value={form.currency} onChange={handleChange} required className="w-full p-2 border rounded" />
+            <select
+              name="currency"
+              value={form.currency}
+              onChange={handleChange}
+              required
+              className="w-full p-2 border rounded"
+            >
+              {availableCurrencies.map((cur) => (
+                <option key={cur} value={cur}>
+                  {cur}
+                </option>
+              ))}
+            </select>
         </div>
 
         <CategorySelector

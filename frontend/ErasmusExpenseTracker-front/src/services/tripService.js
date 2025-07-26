@@ -42,7 +42,8 @@ export const updateTrip = async (tripId, trip) => {
     },
     body: JSON.stringify(trip),
   });
-  if (!res.ok) throw new Error("Failed to update trip");
+  
+  if (!res.ok) throw new Error("Failed to update trip"+res);
   return res.json();
 };
 

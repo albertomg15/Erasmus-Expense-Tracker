@@ -1,5 +1,6 @@
 package com.eet.backend.model;
 
+import com.eet.backend.validation.ValidCurrency;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;

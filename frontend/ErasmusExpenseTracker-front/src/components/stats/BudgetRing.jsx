@@ -1,7 +1,8 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
+import { formatCurrency } from "../../utils/formatters"; // ajusta ruta si es necesario
 
-const BudgetRing = ({ percent, used, max }) => {
+const BudgetRing = ({ percent, used, max, currency }) => {
   const { t } = useTranslation("statistics");
 
   const radius = 60;
@@ -52,7 +53,7 @@ const BudgetRing = ({ percent, used, max }) => {
       </svg>
 
       <p className="text-sm text-gray-600 mt-2">
-        {t("budget.used")} €{used.toFixed(2)} / {t("budget.total")} €{max.toFixed(2)}
+        {t("budget.used")} {formatCurrency(used, currency)} / {t("budget.total")} {formatCurrency(max, currency)}
       </p>
     </div>
   );

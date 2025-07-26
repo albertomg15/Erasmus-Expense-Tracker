@@ -14,7 +14,7 @@
   "description": "Descripción",
   "descriptionOptional": "Descripción (opcional)",
   "tripOptional": "Viaje (opcional)",
-  "associatedTripOptional": "Viaje asociado (opcional)",
+  "associatedTripOptional": "Viaje asociado",
   "none": "-- Ninguno --",
   "recurrencePattern": "Patrón de recurrencia",
   "daily": "Diario",
@@ -60,7 +60,8 @@
     "allKinds": "Todas las clases",
     "regularOnly": "Solo normales",
     "recurringOnly": "Solo recurrentes",
-    "allTrips": "Todos los viajes"
+    "allTrips": "Todos los viajes",
+    "allCategories": "Todas las categorías"
   },
   "sort": {
     "newestFirst": "Más recientes primero",

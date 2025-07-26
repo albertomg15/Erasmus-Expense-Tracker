@@ -3,6 +3,7 @@ package com.eet.backend.service;
 import com.eet.backend.dto.DashboardDto;
 import com.eet.backend.dto.DashboardSummaryDto;
 import com.eet.backend.dto.SummaryDto;
+import com.eet.backend.dto.TransactionDto;
 import com.eet.backend.model.*;
 import com.eet.backend.repository.BudgetRepository;
 import com.eet.backend.repository.RecurringTransactionRepository;
@@ -37,6 +38,8 @@ public class TransactionService {
 
     private final TripRepository tripRepository;
 
+    private final ExchangeRateService exchangeRateService;
+
     public DashboardDto getDashboard(User user) {
         List<Transaction> transactions = transactionRepository.findByUser(user);
         BigDecimal balance = BigDecimal.ZERO;
@@ -65,11 +68,27 @@ public class TransactionService {
         BigDecimal availableBudget = (maxSpending != null) ? maxSpending.subtract(currentMonthExpenses) : null;
 
         // Obtener transacciones recientes
-        List<Transaction> recent = transactionRepository
+        List<TransactionDto> recentDtos = transactionRepository
                 .findAllByUser(user, PageRequest.of(0, 5, Sort.by("date").descending()))
-                .getContent();
+                .getContent()
+                .stream()
+                .map(tx -> TransactionDto.builder()
+                        .transactionId(tx.getTransactionId())
+                        .type(tx.getType().name())
+                        .amount(tx.getAmount())
+                        .currency(tx.getCurrency())
+                        .convertedAmount(exchangeRateService.convert(tx.getAmount(), tx.getCurrency(), user.getPreferredCurrency()))
+                        .convertedCurrency(user.getPreferredCurrency())
+                        .categoryName(tx.getCategory().getName())
+                        .categoryEmoji(tx.getCategory().getEmoji())
+                        .date(tx.getDate())
+                        .description(tx.getDescription())
+                        .tripId(tx.getTrip() != null ? tx.getTrip().getTripId() : null)
+                        .build())
+                .toList();
 
-        return new DashboardDto(balance, currentMonthExpenses, maxSpending, availableBudget, recent);
+
+        return new DashboardDto(balance, currentMonthExpenses, maxSpending, availableBudget, recentDtos);
     }
 
     public List<Transaction> getAllByUserId(UUID userId) {
@@ -81,6 +100,7 @@ public class TransactionService {
     }
 
     public Transaction save(Transaction transaction) {
+
         if (transaction.getTrip() != null && transaction.getTrip().getTripId() != null) {
             UUID tripId = transaction.getTrip().getTripId();
             Trip trip = tripRepository.findById(tripId)
@@ -131,25 +151,26 @@ public class TransactionService {
     public SummaryDto getSummary(User user) {
         List<Transaction> transactions = transactionRepository.findByUser(user);
 
-        BigDecimal balance = BigDecimal.ZERO;
-        BigDecimal currentMonthExpenses = BigDecimal.ZERO;
+
         YearMonth currentMonth = YearMonth.now();
 
-        for (Transaction tx : transactions) {
-            BigDecimal amount = tx.getAmount();
-            if (tx.getType() == TransactionType.INCOME) {
-                balance = balance.add(amount);
-            } else if (tx.getType() == TransactionType.EXPENSE) {
-                balance = balance.subtract(amount);
+        BigDecimal balance = BigDecimal.ZERO;
+        BigDecimal monthlyExpenses = BigDecimal.ZERO;
 
-                YearMonth txMonth = YearMonth.from(tx.getDate());
-                if (txMonth.equals(currentMonth)) {
-                    currentMonthExpenses = currentMonthExpenses.add(amount);
+        for (Transaction tx : transactions) {
+            BigDecimal converted = exchangeRateService.convert(tx.getAmount(), tx.getCurrency(), user.getPreferredCurrency());
+
+            if (tx.getType() == TransactionType.INCOME) {
+                balance = balance.add(converted);
+            } else {
+                balance = balance.subtract(converted);
+
+                if (YearMonth.from(tx.getDate()).equals(currentMonth)) {
+                    monthlyExpenses = monthlyExpenses.add(converted);
                 }
             }
         }
-
-        return new SummaryDto(balance, currentMonthExpenses);
+        return new SummaryDto(balance, monthlyExpenses, user.getPreferredCurrency());
     }
 
     public List<Transaction> getRecentByUser(User user, int limit) {
@@ -159,18 +180,45 @@ public class TransactionService {
     }
 
     public BigDecimal getBalance(User user) {
-        BigDecimal income = transactionRepository.sumAmountByUserAndType(user, TransactionType.INCOME).orElse(BigDecimal.ZERO);
-        BigDecimal expenses = transactionRepository.sumAmountByUserAndType(user, TransactionType.EXPENSE).orElse(BigDecimal.ZERO);
-        return income.subtract(expenses);
+        List<Transaction> transactions = transactionRepository.findByUser(user);
+
+        return transactions.stream()
+                .map(tx -> {
+                    BigDecimal converted = exchangeRateService.convert(
+                            tx.getAmount(),
+                            tx.getCurrency(),
+                            user.getPreferredCurrency()
+                    );
+                    return tx.getType() == TransactionType.INCOME ? converted : converted.negate();
+                })
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
 
     public BigDecimal getCurrentMonthExpenses(User user) {
         LocalDate now = LocalDate.now();
         LocalDate startOfMonth = now.withDayOfMonth(1);
         LocalDate endOfMonth = now.withDayOfMonth(now.lengthOfMonth());
 
-        return transactionRepository.sumExpensesInDateRange(user, startOfMonth, endOfMonth).orElse(BigDecimal.ZERO);
+        List<Transaction> expenses = transactionRepository.findByUserAndTypeAndDateBetween(
+                user,
+                TransactionType.EXPENSE,
+                startOfMonth,
+                endOfMonth
+        );
+
+        return expenses.stream()
+                .map(tx -> exchangeRateService.convert(
+                        tx.getAmount(),
+                        tx.getCurrency(),
+                        user.getPreferredCurrency()
+                ))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
+
+
+
+
 
     public int processDueRecurringTransactions() {
         LocalDate today = LocalDate.now();

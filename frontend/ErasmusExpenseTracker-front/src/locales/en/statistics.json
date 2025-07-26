@@ -39,5 +39,9 @@
   "budget": {
     "used": "Used",
     "total": "Total"
-  }
+  },
+"legend": {
+  "allValuesInPreferredCurrencyWithCode": "All values are shown in your preferred currency ({{currency}})."
+}
+
 }

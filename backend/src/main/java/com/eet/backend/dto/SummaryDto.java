@@ -10,4 +10,5 @@ import java.math.BigDecimal;
 public class SummaryDto {
     private BigDecimal balance;
     private BigDecimal currentMonthExpenses;
+    private String currency;  // Moneda en la que están expresadas las cifras
 }

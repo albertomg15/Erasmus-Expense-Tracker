@@ -176,17 +176,16 @@ const StatsPage = () => {
         ))}
       </div>
 
-      {(["summary", "categories", "incomeVsExpense"].includes(activeTab)) &&
+      {["summary", "categories", "incomeVsExpense"].includes(activeTab) &&
         renderMonthYearFilter()}
 
       {/* Tab Content */}
       {activeTab === "summary" && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <StatCard title="income" value={summary.totalIncome} color="green" />
-            <StatCard title="expense" value={summary.totalExpense} color="red" />
-            <StatCard title="balance" value={summary.balance} color="blue" />
-
+            <StatCard title="income" value={summary.totalIncome} color="green" currency={summary.convertedCurrency} />
+            <StatCard title="expense" value={summary.totalExpense} color="red" currency={summary.convertedCurrency} />
+            <StatCard title="balance" value={summary.balance} color="blue" currency={summary.convertedCurrency} />
           </div>
 
           {summary.monthlyBudget && (
@@ -196,27 +195,68 @@ const StatsPage = () => {
                 percent={summary.budgetUsedPercent}
                 used={summary.totalExpense}
                 max={summary.monthlyBudget}
+                currency={summary.convertedCurrency}
               />
             </div>
           )}
         </>
       )}
 
-      {activeTab === "evolution" && <MonthlyEvolutionChart data={evolution} />}
+      {activeTab === "evolution" && (
+        <MonthlyEvolutionChart
+          data={evolution}
+          currency={summary.convertedCurrency}
+        />
+      )}
+
       {activeTab === "categories" && (
         <>
           <h2 className="text-xl font-semibold mb-2">{t("expensesByCategory")}</h2>
           {summary.expensesByCategory && Object.keys(summary.expensesByCategory).length > 0 ? (
-            <CategoryPieChart data={summary.expensesByCategory} />
+            <CategoryPieChart
+              data={summary.expensesByCategory}
+              currency={summary.convertedCurrency}
+            />
           ) : (
             <p className="text-gray-500">{t("noCategoryData")}</p>
           )}
         </>
       )}
-      {activeTab === "incomeVsExpense" && <IncomeVsExpenseChart data={incomeVsExpense} />}
-      {activeTab === "monthlyComparison" && <MonthlyComparisonChart data={monthlyComparison} />}
-      {activeTab === "tripSpending" && <TripSpendingChart data={tripSpending} />}
-      {activeTab === "annualSummary" && <AnnualSummaryChart data={annualSummary} />}
+
+      {activeTab === "incomeVsExpense" && (
+        <IncomeVsExpenseChart
+          data={incomeVsExpense}
+          currency={summary.convertedCurrency}
+        />
+      )}
+
+      {activeTab === "monthlyComparison" && (
+        <MonthlyComparisonChart
+          data={monthlyComparison}
+          currency={summary.convertedCurrency}
+        />
+      )}
+
+      {activeTab === "tripSpending" && (
+        <TripSpendingChart
+          data={tripSpending}
+          currency={summary.convertedCurrency}
+        />
+      )}
+
+      {activeTab === "annualSummary" && (
+        <AnnualSummaryChart
+          data={annualSummary}
+        />
+      )}
+
+      {!loading && (
+        <p className="text-sm text-gray-500 text-center mt-10">
+          {t("legend.allValuesInPreferredCurrencyWithCode", {
+            currency: summary.convertedCurrency,
+          })}
+        </p>
+      )}
     </div>
   );
 };

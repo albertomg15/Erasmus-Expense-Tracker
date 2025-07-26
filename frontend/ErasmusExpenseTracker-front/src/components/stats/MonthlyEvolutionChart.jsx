@@ -10,8 +10,9 @@ import {
   Legend,
 } from "recharts";
 import { useTranslation } from "react-i18next";
+import { formatCurrency } from "../../utils/formatters";
 
-const MonthlyEvolutionChart = ({ data }) => {
+const MonthlyEvolutionChart = ({ data, currency = "EUR" }) => {
   const { t } = useTranslation("statistics");
 
   return (
@@ -24,7 +25,7 @@ const MonthlyEvolutionChart = ({ data }) => {
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis dataKey="month" />
           <YAxis />
-          <Tooltip />
+          <Tooltip formatter={(value) => formatCurrency(value, currency)} />
           <Legend />
           <Line type="monotone" dataKey="income" stroke="#10B981" name={t("labels.income")} />
           <Line type="monotone" dataKey="expense" stroke="#EF4444" name={t("labels.expense")} />

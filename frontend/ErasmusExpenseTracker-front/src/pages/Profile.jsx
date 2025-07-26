@@ -5,6 +5,9 @@ import { changePassword } from "../services/userService";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
+import { getSupportedCurrencies } from "../services/exchangeRateService";
+
+
 
 
 const Profile = () => {
@@ -20,6 +23,8 @@ const [loadError, setLoadError] = useState(false);
   const [currentPassword, setCurrentPassword] = useState("");
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const { t, i18n } = useTranslation("profile");
+  const [availableCurrencies, setAvailableCurrencies] = useState([]);
+
 
   const handleLanguageChange = (e) => {
     i18n.changeLanguage(e.target.value);
@@ -33,6 +38,20 @@ const [loadError, setLoadError] = useState(false);
       setLoadError(true);
     });
 }, []);
+
+useEffect(() => {
+  async function fetchCurrencies() {
+    try {
+      const currencies = await getSupportedCurrencies();
+      setAvailableCurrencies(currencies);
+    } catch (err) {
+      console.error("Error loading currencies", err);
+    }
+  }
+
+  fetchCurrencies();
+}, []);
+
 
   const handleSave = async () => {
     if (!user.email || !user.language || !user.preferredCurrency) {
@@ -111,16 +130,28 @@ const [loadError, setLoadError] = useState(false);
 
 
 
-        <div>
-          <label className="block mb-1">{t("preferredCurrency")}</label>
-          <input
-            type="text"
-            className="w-full p-2 border rounded"
+        <div className="mb-4">
+          <label htmlFor="preferredCurrency" className="block font-medium mb-1">
+            {t("preferredCurrency")}
+          </label>
+          <select
+            id="preferredCurrency"
             value={user.preferredCurrency || ""}
-            disabled={!editing}
             onChange={(e) => setUser({ ...user, preferredCurrency: e.target.value })}
-          />
+            disabled={!editing}
+            className={`w-full border rounded px-3 py-2 ${
+              editing ? "bg-white" : "bg-gray-100 text-gray-500"
+            }`}
+          >
+            <option value="">{t("selectCurrency")}</option>
+            {availableCurrencies.map((cur) => (
+              <option key={cur} value={cur}>
+                {cur}
+              </option>
+            ))}
+          </select>
         </div>
+
 
         <div className="flex gap-2">
           <button
