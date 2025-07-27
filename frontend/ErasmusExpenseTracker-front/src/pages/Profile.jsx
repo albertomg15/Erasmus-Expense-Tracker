@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "../context/AuthContext";
 import { getUserInfo, updateUser } from "../services/userService";
 import { changePassword } from "../services/userService";
@@ -24,6 +24,9 @@ const [loadError, setLoadError] = useState(false);
   const [showPasswordForm, setShowPasswordForm] = useState(false);
   const { t, i18n } = useTranslation("profile");
   const [availableCurrencies, setAvailableCurrencies] = useState([]);
+const [showConsentInfo, setShowConsentInfo] = useState(false);
+const consentInfoRef = useRef(null);
+
 
 
   const handleLanguageChange = (e) => {
@@ -51,6 +54,25 @@ useEffect(() => {
 
   fetchCurrencies();
 }, []);
+
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (consentInfoRef.current && !consentInfoRef.current.contains(event.target)) {
+      setShowConsentInfo(false);
+    }
+  };
+
+  if (showConsentInfo) {
+    document.addEventListener("mousedown", handleClickOutside);
+  } else {
+    document.removeEventListener("mousedown", handleClickOutside);
+  }
+
+  return () => {
+    document.removeEventListener("mousedown", handleClickOutside);
+  };
+}, [showConsentInfo]);
+
 
 
   const handleSave = async () => {
@@ -151,6 +173,83 @@ useEffect(() => {
             ))}
           </select>
         </div>
+
+        <div className="mb-4">
+  <label htmlFor="country" className="block font-medium mb-1">
+    {t("country")}
+  </label>
+  <select
+    id="country"
+    value={user.country || ""}
+    onChange={(e) => setUser({ ...user, country: e.target.value })}
+    disabled={!editing}
+    className={`w-full border rounded px-3 py-2 ${
+      editing ? "bg-white" : "bg-gray-100 text-gray-500"
+    }`}
+  >
+    <option value="">{t("selectCountry")}</option>
+    <option value="ES">Spain</option>
+    <option value="FR">France</option>
+    <option value="IT">Italy</option>
+    <option value="DE">Germany</option>
+    <option value="PT">Portugal</option>
+    <option value="IE">Ireland</option>
+    <option value="NL">Netherlands</option>
+    <option value="AT">Austria</option>
+    <option value="FI">Finland</option>
+    <option value="GR">Greece</option>
+    <option value="CY">Cyprus</option>
+    <option value="LU">Luxembourg</option>
+    <option value="BE">Belgium</option>
+    <option value="LT">Lithuania</option>
+    <option value="LV">Latvia</option>
+    <option value="PL">Poland</option>
+    <option value="US">United States</option>
+    <option value="CA">Canada</option>
+    <option value="MX">Mexico</option>
+    <option value="GB">United Kingdom</option>
+    <option value="JP">Japan</option>
+    <option value="CH">Switzerland</option>
+  </select>
+</div>
+
+<div className="mb-4 relative">
+  <label className="inline-flex items-start gap-2 items-center">
+    <input
+      type="checkbox"
+      className="mt-1"
+      checked={user.consentToDataAnalysis || false}
+      onChange={(e) =>
+        setUser({ ...user, consentToDataAnalysis: e.target.checked })
+      }
+      disabled={!editing}
+    />
+    <div>
+      <span>
+        {t("consentText")}{" "}
+        <button
+          type="button"
+          className="text-blue-600 underline text-sm"
+          onClick={() => setShowConsentInfo((prev) => !prev)}
+        >
+          {t("learnMore")}
+        </button>
+      </span>
+
+      {showConsentInfo && (
+        <div
+          ref={consentInfoRef}
+          className="mt-2 text-sm text-gray-700 bg-gray-100 border border-gray-300 rounded-md p-3"
+        >
+          {t("consentTooltip")}
+        </div>
+      )}
+    </div>
+  </label>
+</div>
+
+
+
 
 
         <div className="flex gap-2">

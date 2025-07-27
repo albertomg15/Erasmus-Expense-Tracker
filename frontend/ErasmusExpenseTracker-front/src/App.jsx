@@ -19,7 +19,7 @@ import TripDetail from "./pages/TripDetail.jsx";
 import TripEdit from "./pages/TripEdit";
 import BudgetsPage from "./pages/BudgetsPage.jsx";
 import BudgetEdit from "./pages/BudgetEdit.jsx";
-
+import CountryComparison from './pages/CountryComparison.jsx';
 
 
 
@@ -51,6 +51,7 @@ function App() {
           <Route path="/trips/edit/:tripId" element={<TripEdit />} />
           <Route path="/budgets" element={<BudgetsPage />} />
           <Route path="/budgets/edit/:budgetId" element={<BudgetEdit />} />
+          <Route path="/comparison" element={<CountryComparison />} />
 
 
 

@@ -4,7 +4,14 @@
   "email": "Email",
   "language": "Language",
   "preferredCurrency": "Preferred Currency",
-  "edit": "Edit",
+  "country": "Country",
+  "selectCountry": "Select a country",
+
+  "consentText": "I agree to the anonymous processing of my data for statistical purposes",
+  "learnMore": "Learn more",
+  "consentTooltip": "Your data will be processed anonymously and used solely to improve your experience and provide country-based spending comparisons and recommendations."
+
+,"edit": "Edit",
   "cancel": "Cancel",
   "saveChanges": "Save Changes",
   "password": "Password",

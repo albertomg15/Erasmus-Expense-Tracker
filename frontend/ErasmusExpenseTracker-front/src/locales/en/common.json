@@ -8,7 +8,9 @@
     "statistics": "Statistics",
     "budgets": "Budgets",
     "profile": "Edit Profile",
-    "logout": "Logout"
+    "logout": "Logout",
+      "comparison": "Comparison"
+
   },
   "tags": {
     "label": "Tags",

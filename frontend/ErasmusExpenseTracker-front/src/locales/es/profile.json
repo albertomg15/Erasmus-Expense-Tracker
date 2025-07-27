@@ -4,7 +4,11 @@
   "email": "Correo electrónico",
   "language": "Idioma",
   "preferredCurrency": "Moneda preferida",
-  "edit": "Editar",
+  "country": "Country",
+  "selectCountry": "Selecciona un país",
+"consentText": "Acepto el tratamiento anónimo de mis datos con fines estadísticos",
+  "learnMore": "Más información",
+  "consentTooltip": "Tus datos se tratarán de forma anónima y se utilizarán únicamente para mejorar tu experiencia y ofrecerte comparativas de gastos con otros usuarios de tu país.",    "edit": "Editar",
   "cancel": "Cancelar",
   "saveChanges": "Guardar cambios",
   "password": "Contraseña",
@@ -21,5 +25,6 @@
   "passwordSuccess": "Contraseña actualizada correctamente.",
   "passwordError": "Error al cambiar la contraseña.",
   "selectCurrency": "Selecciona una moneda"
+
 
 }

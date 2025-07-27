@@ -28,6 +28,7 @@ export default function Navbar() {
         <Link to="/transactions" className="hover:underline">💰 {t("nav.transactions")}</Link>
         <Link to="/statistics" className="hover:underline">📊 {t("nav.statistics")}</Link>
         <Link to="/budgets" className="hover:underline">🧾 {t("nav.budgets")}</Link>
+        <Link to="/comparison" className="hover:underline">🌍 {t("nav.comparison")}</Link>
         <Link to="/profile" className="hover:underline">👤 {t("nav.profile")}</Link>
         <button onClick={handleLogout} className="hover:underline">🚪 {t("nav.logout")}</button>
       </div>

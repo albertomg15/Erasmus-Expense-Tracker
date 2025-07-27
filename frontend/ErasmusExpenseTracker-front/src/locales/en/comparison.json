@@ -1,0 +1,7 @@
+{
+  "loading": "Loading data...",
+  "error": "Error fetching data",
+  "countryAveragesTitle": "Country Spending Averages",
+  "countryAveragesDescription": "This chart shows average monthly spending by category in your country, based on anonymized user data.",
+  "countryAverage": "Country Avg."
+}

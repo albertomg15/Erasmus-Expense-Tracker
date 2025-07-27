@@ -1,0 +1,7 @@
+{
+  "loading": "Cargando datos...",
+  "error": "Error al obtener los datos",
+  "countryAveragesTitle": "Promedios de gasto por país",
+  "countryAveragesDescription": "Este gráfico muestra el gasto mensual medio por categoría en tu país, basado en datos anónimos de usuarios.",
+  "countryAverage": "Media país"
+}

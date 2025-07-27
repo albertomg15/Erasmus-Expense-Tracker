@@ -1,8 +1,10 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import { register } from "../services/authService";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
+import { getSupportedCurrencies } from "../services/exchangeRateService";
+
 
 export default function Register() {
   const { t } = useTranslation("auth");
@@ -14,6 +16,10 @@ export default function Register() {
   const [language, setLanguage] = useState("en");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const [country, setCountry] = useState("");
+const supportedCurrencies = ["EUR", "USD", "GBP", "JPY", "CHF", "CAD", "MXN", "PLN"];
+
+
 
   const isValidEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
@@ -37,7 +43,7 @@ export default function Register() {
     }
 
     try {
-      await register({ email, password, preferredCurrency, language });
+      await register({ email, password, preferredCurrency, language, country });
       toast.success(t("registrationSuccess"));
       navigate("/login");
     } catch (err) {
@@ -98,34 +104,85 @@ export default function Register() {
             required
           />
         </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="preferredCurrency">
-            {t("preferredCurrency")}
+      <div className="mb-4">
+          <label className="block text-gray-700 mb-2" htmlFor="currency">
+            {t("prefferedCurrency")}
           </label>
-          <input
-            type="text"
-            id="preferredCurrency"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
-            value={preferredCurrency}
-            onChange={(e) => setPreferredCurrency(e.target.value)}
-            required
-          />
-        </div>
+        <select
+              id="preferredCurrency"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md"
+              value={preferredCurrency}
+              onChange={(e) => setPreferredCurrency(e.target.value)}
+              required
+            >
+              <option value="">{t("selectCurrency")}</option>
+              {supportedCurrencies.map((cur) => (
+                <option key={cur} value={cur}>
+                  {cur}
+                </option>
+              ))}
+        </select>
+      </div>
 
-        <div className="mb-4">
-          <label className="block text-gray-700 mb-2" htmlFor="language">
-            {t("language")}
-          </label>
-          <input
-            type="text"
-            id="language"
-            className="w-full px-4 py-2 border border-gray-300 rounded-md"
-            value={language}
-            onChange={(e) => setLanguage(e.target.value)}
-            required
-          />
-        </div>
+
+      <div className="mb-4">
+        <label className="block text-gray-700 mb-2" htmlFor="language">
+          {t("language")}
+        </label>
+         <select
+          id="language"
+          className="w-full px-4 py-2 border border-gray-300 rounded-md"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          required
+        >
+          <option value="en">English</option>
+          <option value="es">Español</option>
+        </select>
+      </div>
+
+
+<div className="mb-4">
+  <label className="block text-gray-700 mb-2" htmlFor="country">
+    {t("country")}
+  </label>
+  <select
+    id="country"
+    className="w-full px-4 py-2 border border-gray-300 rounded-md"
+    value={country}
+    onChange={(e) => setCountry(e.target.value)}
+    required
+  >
+    <option value="">{t("selectCountry")}</option>
+    <option value="ES">Spain</option>
+    <option value="FR">France</option>
+    <option value="IT">Italy</option>
+    <option value="DE">Germany</option>
+    <option value="PT">Portugal</option>
+    <option value="IE">Ireland</option>
+    <option value="BE">Belgium</option>
+    <option value="NL">Netherlands</option>
+    <option value="AT">Austria</option>
+    <option value="FI">Finland</option>
+    <option value="GR">Greece</option>
+    <option value="SK">Slovakia</option>
+    <option value="CY">Cyprus</option>
+    <option value="SI">Slovenia</option>
+    <option value="LU">Luxembourg</option>
+    <option value="MT">Malta</option>
+    <option value="EE">Estonia</option>
+    <option value="LT">Lithuania</option>
+    <option value="LV">Latvia</option>
+    <option value="USD">United States</option>
+    <option value="CA">Canada</option>
+    <option value="MX">Mexico</option>
+    <option value="GB">United Kingdom</option>
+    <option value="JP">Japan</option>
+    <option value="CH">Switzerland</option>
+    <option value="PL">Poland</option>
+  </select>
+</div>
+
 
         <button
           type="submit"
