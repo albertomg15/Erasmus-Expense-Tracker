@@ -24,24 +24,18 @@ public class AuthService {
     LocalDate today = LocalDate.now();
 
     public AuthResponse register(RegisterRequest request) {
-        User user = userService.register(
-                request.getEmail(),
-                request.getPassword(),
-                request.getPreferredCurrency(),
-                request.getLanguage()
-        );
-
-        Budget defaultBudget = Budget.builder()
-                .month(today.getMonthValue())
-                .year(today.getYear())
-                .maxSpending(BigDecimal.ZERO)
-                .warningThreshold(BigDecimal.ZERO)
-                .user(user)
+        User newUser = User.builder()
+                .email(request.getEmail())
+                .passwordHash(passwordEncoder.encode(request.getPassword()))
+                .preferredCurrency(request.getPreferredCurrency())
+                .language(request.getLanguage())
+                .country(request.getCountry())
+                .consentToDataAnalysis(false) // explícitamente false
                 .build();
 
+        User savedUser = userService.save(newUser);
 
-        budgetService.save(defaultBudget);
-        String token = jwtService.generateToken(user); // <-- usuario completo
+        String token = jwtService.generateToken(savedUser); // <-- usuario completo
         return new AuthResponse(token);
     }
 

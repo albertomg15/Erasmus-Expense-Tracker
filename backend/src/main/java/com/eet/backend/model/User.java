@@ -38,6 +38,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String language;
 
+    @Column
+    private String country; // Ejemplo: "ES" (España), "FR" (Francia)
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private Boolean consentToDataAnalysis = false;
+
+
     // Relaciones
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
@@ -50,6 +57,7 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Category> categories;
+
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

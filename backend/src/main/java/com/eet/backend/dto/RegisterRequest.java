@@ -8,4 +8,5 @@ public class RegisterRequest {
     private String password;
     private String preferredCurrency;
     private String language;
+    private String country; // nuevo campo
 }

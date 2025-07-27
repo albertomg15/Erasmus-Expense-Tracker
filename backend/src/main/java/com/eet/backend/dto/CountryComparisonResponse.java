@@ -3,13 +3,11 @@ package com.eet.backend.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.math.BigDecimal;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
-public class CountryComparisonDtoResponse {
-    private String category;
-    private BigDecimal userAverage;
-    private BigDecimal countryAverage;
-    private String currency;
+public class CountryComparisonResponse {
+    private boolean incompleteData;
+    private List<CountryComparisonDto> comparisons;
 }

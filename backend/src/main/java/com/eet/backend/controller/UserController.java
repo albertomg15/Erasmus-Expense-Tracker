@@ -1,8 +1,10 @@
 package com.eet.backend.controller;
 
 import com.eet.backend.dto.ChangePasswordRequest;
+import com.eet.backend.dto.UserProfileUpdateDto;
 import com.eet.backend.model.User;
 import com.eet.backend.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -35,20 +37,22 @@ public class UserController {
 
 
 
-        @PutMapping
-        public ResponseEntity<User> updateUser(
-                @AuthenticationPrincipal UserDetails userDetails,
-                @RequestBody User updatedUser
-        ) {
-            User user = userService.getByEmail(userDetails.getUsername())
-                    .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    @PutMapping
+    public ResponseEntity<User> updateUser(
+            @AuthenticationPrincipal UserDetails userDetails,
+            @RequestBody @Valid UserProfileUpdateDto dto
+    ) {
+        User user = userService.getByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
 
-            user.setPreferredCurrency(updatedUser.getPreferredCurrency());
-            user.setLanguage(updatedUser.getLanguage());
-            // ¡NO ACTUALICES EL EMAIL AQUÍ a menos que controles su unicidad!
+        user.setPreferredCurrency(dto.getPreferredCurrency());
+        user.setLanguage(dto.getLanguage());
+        user.setCountry(dto.getCountry());
+        user.setConsentToDataAnalysis(dto.isConsentToDataAnalysis());
 
-            return ResponseEntity.ok(userService.save(user));
-        }
+        return ResponseEntity.ok(userService.save(user));
     }
+
+}
 
 
