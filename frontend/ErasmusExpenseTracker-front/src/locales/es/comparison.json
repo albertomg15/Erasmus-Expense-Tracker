@@ -3,5 +3,32 @@
   "error": "Error al obtener los datos",
   "countryAveragesTitle": "Promedios de gasto por país",
   "countryAveragesDescription": "Este gráfico muestra el gasto mensual medio por categoría en tu país, basado en datos anónimos de usuarios.",
-  "countryAverage": "Media país"
+  "countryAverage": "Media país",
+  "userAverage": "Tu promedio",
+  "showIncompleteUserData": "Incluir tus datos aunque estén incompletos",
+  
+  "title": "Comparativa de gastos con la media del pais",
+  "user": "You",
+  "country": "Country Average",
+  "incompleteNotice": "Para hacer esta comparativa útil, asegúrate de que los datos del mes estén completos.",
+  "consentRequired": "Para ver esta sección, habilita la casilla de consetimiento de procesado de datos en el perfil.",
+   "selectMonth": "Seleccionar mes",
+  "selectYear": "Seleccionar año",
+  "months": {
+    "1": "Enero",
+    "2": "Febrero",
+    "3": "Marzo",
+    "4": "Abril",
+    "5": "Mayo",
+    "6": "Junio",
+    "7": "Julio",
+    "8": "Agosto",
+    "9": "Septiembre",
+    "10": "Octubre",
+    "11": "Noviembre",
+    "12": "Diciembre"
+  },
+  "currencyNote": "Todas la cantidades se muestran en: {{currency}}"
+
+
 }

@@ -1,7 +1,36 @@
 {
   "loading": "Loading data...",
-  "error": "Error fetching data",
   "countryAveragesTitle": "Country Spending Averages",
   "countryAveragesDescription": "This chart shows average monthly spending by category in your country, based on anonymized user data.",
-  "countryAverage": "Country Avg."
+  "countryAverage": "Country Avg.",
+  
+  "userAverage": "Your Avg",
+  "showIncompleteUserData": "Include your data even if incomplete",
+
+  "title": "Spending Comparison with Country Averages",
+  "error": "Failed to load data",
+  "user": "You",
+  "country": "Country Average",
+  "incompleteNotice": "To make this comparison useful, make sure your transactions for the current month are complete.",
+  "consentRequired": "To view this section, you must enable data analysis consent in your profile.",
+  "selectMonth": "Select Month",
+  "selectYear": "Select Year",
+
+
+  "months": {
+    "1": "January",
+    "2": "February",
+    "3": "March",
+    "4": "April",
+    "5": "May",
+    "6": "June",
+    "7": "July",
+    "8": "August",
+    "9": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+  },
+  "currencyNote": "All amounts are shown in:{{currency}}"
+
 }

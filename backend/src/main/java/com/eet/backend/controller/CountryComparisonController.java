@@ -24,7 +24,8 @@ public class CountryComparisonController {
     @GetMapping
     public ResponseEntity<CountryComparisonResponse> getComparison(
             @AuthenticationPrincipal UserDetails userDetails,
-            @RequestParam(defaultValue = "false") boolean forceIncludeIncomplete
+            @RequestParam int month,
+            @RequestParam int year
     ) {
         User user = userService.getByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -33,8 +34,7 @@ public class CountryComparisonController {
             return ResponseEntity.badRequest().build();
         }
 
-        CountryComparisonResponse response = statsService.getComparisonForUser(user, forceIncludeIncomplete);
+        CountryComparisonResponse response = statsService.getComparisonForUser(user, year, month);
         return ResponseEntity.ok(response);
     }
-
 }

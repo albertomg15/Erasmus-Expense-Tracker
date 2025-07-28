@@ -129,22 +129,22 @@ public class CountrySpendingStatsService {
         }
     }
 
-    public CountryComparisonResponse getComparisonForUser(User user, boolean forceIncludeIncomplete) {
+    public CountryComparisonResponse getComparisonForUser(User user, int year, int month) {
         String country = user.getCountry();
         String currency = COUNTRY_CURRENCY_MAP.get(country);
 
         if (country == null || currency == null) return new CountryComparisonResponse(true, List.of());
 
-        YearMonth now = YearMonth.now();
-        LocalDate start = now.atDay(1);
-        LocalDate end = now.atEndOfMonth();
+        YearMonth selectedMonth = YearMonth.of(year, month);
+        LocalDate start = selectedMonth.atDay(1);
+        LocalDate end = selectedMonth.atEndOfMonth();
 
         List<Transaction> txs = transactionRepository.findByUserAndTypeAndDateBetween(
                         user, TransactionType.EXPENSE, start, end
                 ).stream()
                 .filter(tx -> tx.getCategory() != null && tx.getCategory().isDefault())
                 .filter(tx -> tx.getTrip() == null)
-                .collect(Collectors.toList());
+                .toList();
 
         boolean incomplete = txs.size() < 3;
 
@@ -160,13 +160,20 @@ public class CountrySpendingStatsService {
                         )
                 ));
 
-        // para todas las categorías del país, aunque el usuario no tenga datos
+        // normalizamos claves para evitar problemas de formato
+        Map<String, BigDecimal> userAvgByCategoryNormalized = userAvgByCategory.entrySet().stream()
+                .collect(Collectors.toMap(
+                        entry -> entry.getKey().trim().toUpperCase(),
+                        Map.Entry::getValue
+                ));
+
         List<CountryComparisonDto> comparisons = statsRepo.findByCountry(country).stream()
                 .map(stat -> {
-                    BigDecimal userAvg = userAvgByCategory.get(stat.getCategory());
+                    String categoryKey = stat.getCategory().trim().toUpperCase();
+                    BigDecimal userAvg = userAvgByCategoryNormalized.getOrDefault(categoryKey, BigDecimal.ZERO);
                     return new CountryComparisonDto(
                             stat.getCategory(),
-                            (incomplete && !forceIncludeIncomplete) ? null : userAvg,
+                            userAvg,
                             stat.getAverageAmount(),
                             currency
                     );
@@ -175,6 +182,7 @@ public class CountrySpendingStatsService {
 
         return new CountryComparisonResponse(incomplete, comparisons);
     }
+
 
 
 

@@ -31,6 +31,9 @@ import tripsEs from "./locales/es/trips.json";
 import statisticsEn from "./locales/en/statistics.json";
 import statisticsEs from "./locales/es/statistics.json";
 
+import comparisonEn from "./locales/en/comparison.json";
+import comparisonEs from "./locales/es/comparison.json";
+
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -45,7 +48,8 @@ i18n
         categories: categoriesEn,
         common: commonEn,
         dashboard: dashBoardEn,
-        trips: tripsEn
+        trips: tripsEn,
+        comparison: comparisonEn
       },
       es: {
         budget: budgetEs,
@@ -56,12 +60,13 @@ i18n
         categories: categoriesEs,
         common: commonEs,
         dashboard: dashBoardEs,
-        trips: tripsEs
+        trips: tripsEs,
+        comparison: comparisonEs
       }
     },
     fallbackLng: "en",
     defaultNS: "common", // Puedes dejarlo así si lo cambias dinámicamente
-    ns: ["budget", "profile", "transactions", "tags", "statistics","auth", "categories", "common", "dashboard", "trips"],
+    ns: ["budget", "profile", "transactions", "tags", "statistics","auth", "categories", "common", "dashboard", "trips","comparison"],
     interpolation: {
       escapeValue: false
     }
