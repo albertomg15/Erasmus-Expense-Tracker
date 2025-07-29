@@ -1,6 +1,5 @@
 package com.eet.backend.model;
 
-import com.eet.backend.validation.ValidCurrency;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -8,7 +7,6 @@ import org.hibernate.annotations.GenericGenerator;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Entity
