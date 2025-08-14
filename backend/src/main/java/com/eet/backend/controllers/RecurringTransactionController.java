@@ -1,9 +1,11 @@
 package com.eet.backend.controller;
 
+import com.eet.backend.dto.RecurringTransactionCreateDTO;
 import com.eet.backend.model.RecurringTransaction;
 import com.eet.backend.model.User;
 import com.eet.backend.service.RecurringTransactionService;
 import com.eet.backend.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -41,13 +43,14 @@ public class RecurringTransactionController {
     }
 
     @PostMapping
-    public ResponseEntity<RecurringTransaction> create(@RequestBody RecurringTransaction recurringTransaction,
-                                                       @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public ResponseEntity<RecurringTransaction> create(
+            @Valid @RequestBody RecurringTransactionCreateDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
 
-        recurringTransaction.setUser(user);
-        RecurringTransaction saved = recurringTransactionService.save(recurringTransaction);
+        User user = userService.getByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
+
+        RecurringTransaction saved = recurringTransactionService.createFromDto(dto, user);
         return ResponseEntity.ok(saved);
     }
 

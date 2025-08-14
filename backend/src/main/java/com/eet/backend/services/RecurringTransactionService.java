@@ -1,10 +1,10 @@
 package com.eet.backend.service;
 
-import com.eet.backend.model.RecurrencePattern;
-import com.eet.backend.model.RecurringTransaction;
-import com.eet.backend.model.Transaction;
-import com.eet.backend.model.User;
+import com.eet.backend.dto.RecurringTransactionCreateDTO;
+import com.eet.backend.model.*;
+import com.eet.backend.repository.CategoryRepository;
 import com.eet.backend.repository.RecurringTransactionRepository;
+import com.eet.backend.repository.TripRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -24,6 +24,9 @@ public class RecurringTransactionService {
     private final RecurringTransactionRepository recurringTransactionRepository;
 
     private final TransactionService transactionService;
+
+    private final CategoryRepository categoryRepository;
+    private final TripRepository tripRepository;
 
     public List<RecurringTransaction> getAll() {
         return recurringTransactionRepository.findAll();
@@ -78,12 +81,62 @@ public class RecurringTransactionService {
 
     }
 
+    @Transactional
+    public RecurringTransaction createFromDto(RecurringTransactionCreateDTO dto, User user) {
+
+        Category category = categoryRepository.findById(dto.getCategoryId())
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada"));
+
+        Trip trip = null;
+        if (dto.getTripId() != null) {
+            trip = tripRepository.findById(dto.getTripId())
+                    .orElseThrow(() -> new IllegalArgumentException("Viaje no encontrado"));
+        }
+
+        // Mapear campos base de Transaction
+        RecurringTransaction entity = new RecurringTransaction();
+        entity.setUser(user);
+        entity.setCategory(category);
+        entity.setTrip(trip);
+        entity.setType(dto.getType());
+        entity.setAmount(dto.getAmount());
+        entity.setCurrency(dto.getCurrency());
+        entity.setDate(dto.getDate());
+        entity.setDescription(dto.getDescription());
+
+        // Mapear recurrencia
+        entity.setRecurrencePattern(dto.getRecurrencePattern());
+        entity.setRecurrenceStartDate(dto.getRecurrenceStartDate() != null ? dto.getRecurrenceStartDate() : dto.getDate());
+        entity.setRecurrenceEndDate(dto.getRecurrenceEndDate());
+
+        // Si no te fías del front, calcula nextExecution tú
+        entity.setNextExecution(dto.getNextExecution() != null ? dto.getNextExecution() : calcNextExecution(entity));
+
+        entity.setMaxOccurrences(dto.getMaxOccurrences());
+        entity.setExecutedOccurrences(0);
+        entity.setActive(true);
+
+        return recurringTransactionRepository.save(entity);
+    }
     private LocalDate getNextExecutionDate(LocalDate current, RecurrencePattern pattern) {
         return switch (pattern) {
             case DAILY -> current.plusDays(1);
             case WEEKLY -> current.plusWeeks(1);
             case MONTHLY -> current.plusMonths(1);
             case YEARLY -> current.plusYears(1);
+        };
+    }
+
+    private LocalDate calcNextExecution(RecurringTransaction e) {
+        // Ejemplo naive: next = start date (o date) si es futuro; si no, sumar según patrón
+        LocalDate base = e.getRecurrenceStartDate() != null ? e.getRecurrenceStartDate() : e.getDate();
+        if (base.isAfter(LocalDate.now())) return base;
+
+        return switch (e.getRecurrencePattern()) {
+            case DAILY -> LocalDate.now().plusDays(1);
+            case WEEKLY -> LocalDate.now().plusWeeks(1);
+            case MONTHLY -> LocalDate.now().plusMonths(1);
+            case YEARLY -> LocalDate.now().plusYears(1);
         };
     }
 
