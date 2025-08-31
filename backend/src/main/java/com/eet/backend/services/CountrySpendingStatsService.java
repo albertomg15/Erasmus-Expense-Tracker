@@ -1,4 +1,4 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.CountryComparisonDto;
 import com.eet.backend.dto.CountryComparisonResponse;
@@ -6,9 +6,9 @@ import com.eet.backend.model.CountrySpendingStats;
 import com.eet.backend.model.Transaction;
 import com.eet.backend.model.TransactionType;
 import com.eet.backend.model.User;
-import com.eet.backend.repository.CountrySpendingStatsRepository;
-import com.eet.backend.repository.TransactionRepository;
-import com.eet.backend.repository.UserRepository;
+import com.eet.backend.repositories.CountrySpendingStatsRepository;
+import com.eet.backend.repositories.TransactionRepository;
+import com.eet.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service

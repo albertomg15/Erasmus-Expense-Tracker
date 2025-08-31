@@ -1,10 +1,11 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.RecurringTransactionCreateDTO;
+import com.eet.backend.dto.RecurringTransactionUpdateDTO;
 import com.eet.backend.model.*;
-import com.eet.backend.repository.CategoryRepository;
-import com.eet.backend.repository.RecurringTransactionRepository;
-import com.eet.backend.repository.TripRepository;
+import com.eet.backend.repositories.CategoryRepository;
+import com.eet.backend.repositories.RecurringTransactionRepository;
+import com.eet.backend.repositories.TripRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,8 +14,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
-import static com.eet.backend.model.RecurrencePattern.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,42 +43,67 @@ public class RecurringTransactionService {
         recurringTransactionRepository.deleteById(id);
     }
 
-    public void processDueTransactions() {
+    @Transactional
+    public int processDueTransactions() {
         LocalDate today = LocalDate.now();
-        List<RecurringTransaction> dueTransactions =
+        List<RecurringTransaction> due =
                 recurringTransactionRepository.findByActiveTrueAndNextExecutionLessThanEqual(today);
 
-        for (RecurringTransaction recurring : dueTransactions) {
-            // Crear nueva transacción normal clonando datos
-            Transaction newTx = Transaction.builder()
-                    .type(recurring.getType())
-                    .amount(recurring.getAmount())
-                    .currency(recurring.getCurrency())
-                    .date(today)
-                    .description(recurring.getDescription())
-                    .user(recurring.getUser())
-                    .trip(recurring.getTrip())
-                    .category(recurring.getCategory())
-                    .build();
+        int created = 0;
 
-            // Guardar transacción (suponiendo que tienes acceso a TransactionService o TransactionRepository)
-            transactionService.save(newTx); // o transactionRepository.save(newTx)
+        for (RecurringTransaction rt : due) {
+            // Crea todas las ocurrencias pendientes hasta hoy
+            while (rt.isActive()
+                    && !isFinished(rt)
+                    && !rt.getNextExecution().isAfter(today)) {
 
-            // Actualizar la recurrente
-            recurring.setExecutedOccurrences(recurring.getExecutedOccurrences() + 1);
-            recurring.setNextExecution(getNextExecutionDate(recurring.getNextExecution(), recurring.getRecurrencePattern()));
+                Transaction newTx = Transaction.builder()
+                        .type(rt.getType())
+                        .amount(rt.getAmount())
+                        .currency(rt.getCurrency())
+                        .date(rt.getNextExecution()) // 👈 FECHA CORRECTA
+                        .description(rt.getDescription())
+                        .user(rt.getUser())
+                        .trip(rt.getTrip())
+                        .category(rt.getCategory())
+                        .build();
 
-            // Si ha alcanzado el límite, desactiva
-            if ((recurring.getRecurrenceEndDate() != null && recurring.getNextExecution().isAfter(recurring.getRecurrenceEndDate())) ||
-                    (recurring.getMaxOccurrences() != null && recurring.getExecutedOccurrences() >= recurring.getMaxOccurrences())) {
-                recurring.setActive(false);
+                transactionService.save(newTx);
+                created++;
+
+                // Avanza estado
+                rt.setExecutedOccurrences(
+                        (rt.getExecutedOccurrences() == null ? 0 : rt.getExecutedOccurrences()) + 1
+                );
+                rt.setNextExecution(nextDate(rt.getNextExecution(), rt.getRecurrencePattern()));
+
+                if (isFinished(rt)) {
+                    rt.setActive(false);
+                }
             }
-
-            // Guardar cambios
-            recurringTransactionRepository.save(recurring);
+            recurringTransactionRepository.save(rt);
         }
-
+        return created;
     }
+
+    private boolean isFinished(RecurringTransaction rt) {
+        boolean byDate = rt.getRecurrenceEndDate() != null
+                && rt.getNextExecution().isAfter(rt.getRecurrenceEndDate());
+        boolean byCount = rt.getMaxOccurrences() != null
+                && rt.getExecutedOccurrences() != null
+                && rt.getExecutedOccurrences() >= rt.getMaxOccurrences();
+        return byDate || byCount;
+    }
+
+    private LocalDate nextDate(LocalDate current, RecurrencePattern pattern) {
+        return switch (pattern) {
+            case DAILY -> current.plusDays(1);
+            case WEEKLY -> current.plusWeeks(1);
+            case MONTHLY -> current.plusMonths(1);
+            case YEARLY -> current.plusYears(1);
+        };
+    }
+
 
     @Transactional
     public RecurringTransaction createFromDto(RecurringTransactionCreateDTO dto, User user) {
@@ -109,14 +133,60 @@ public class RecurringTransactionService {
         entity.setRecurrenceStartDate(dto.getRecurrenceStartDate() != null ? dto.getRecurrenceStartDate() : dto.getDate());
         entity.setRecurrenceEndDate(dto.getRecurrenceEndDate());
 
-        // Si no te fías del front, calcula nextExecution tú
-        entity.setNextExecution(dto.getNextExecution() != null ? dto.getNextExecution() : calcNextExecution(entity));
+        boolean fill = Boolean.TRUE.equals(dto.getFillPastOccurrences());
+
+        if (fill) {
+            // empezar desde el inicio para permitir catch-up completo
+            entity.setNextExecution(entity.getRecurrenceStartDate());
+        } else {
+            // comportamiento actual (futuro)
+            entity.setNextExecution(dto.getNextExecution() != null ? dto.getNextExecution() : calcNextExecution(entity));
+        }
+
 
         entity.setMaxOccurrences(dto.getMaxOccurrences());
         entity.setExecutedOccurrences(0);
         entity.setActive(true);
 
-        return recurringTransactionRepository.save(entity);
+        RecurringTransaction saved = recurringTransactionRepository.save(entity);
+
+        if (fill) {
+            // procesar SOLO esta recurrente
+            processOneRecurring(saved);
+            // re-cargar por si cambió nextExecution/active
+            saved = recurringTransactionRepository.findById(saved.getTransactionId()).orElse(saved);
+        }
+
+
+        return saved;
+
+    }
+
+    private void processOneRecurring(RecurringTransaction rt) {
+        LocalDate today = LocalDate.now();
+        if (rt.getExecutedOccurrences() == null) rt.setExecutedOccurrences(0);
+        if (rt.getNextExecution() == null) rt.setNextExecution(calcNextExecution(rt));
+
+        while (rt.isActive() && !isFinished(rt) && !rt.getNextExecution().isAfter(today)) {
+            Transaction newTx = Transaction.builder()
+                    .type(rt.getType())
+                    .amount(rt.getAmount())
+                    .currency(rt.getCurrency())
+                    .date(rt.getNextExecution())
+                    .description(rt.getDescription())
+                    .user(rt.getUser())
+                    .trip(rt.getTrip())
+                    .category(rt.getCategory())
+                    .build();
+
+            transactionService.save(newTx);
+
+            rt.setExecutedOccurrences(rt.getExecutedOccurrences() + 1);
+            rt.setNextExecution(nextDate(rt.getNextExecution(), rt.getRecurrencePattern()));
+
+            if (isFinished(rt)) rt.setActive(false);
+        }
+        recurringTransactionRepository.save(rt);
     }
     private LocalDate getNextExecutionDate(LocalDate current, RecurrencePattern pattern) {
         return switch (pattern) {
@@ -140,26 +210,96 @@ public class RecurringTransactionService {
         };
     }
 
-    public Optional<RecurringTransaction> update(UUID id, RecurringTransaction updated, User user) {
+    public Optional<RecurringTransaction> updateFromDto(UUID id, RecurringTransactionUpdateDTO dto, User user) {
         return recurringTransactionRepository.findById(id)
                 .filter(tx -> tx.getUser().getUserId().equals(user.getUserId()))
                 .map(existing -> {
-                    existing.setAmount(updated.getAmount());
-                    existing.setCurrency(updated.getCurrency());
-                    existing.setDate(updated.getDate());
-                    existing.setDescription(updated.getDescription());
-                    existing.setType(updated.getType());
-                    existing.setCategory(updated.getCategory());
-                    existing.setTrip(updated.getTrip());
+                    existing.setType(dto.getType());
+                    existing.setAmount(dto.getAmount());
+                    existing.setCurrency(dto.getCurrency());
+                    existing.setDate(dto.getDate());
+                    existing.setDescription(dto.getDescription());
 
-                    // Campos específicos de recurrentes
-                    existing.setRecurrencePattern(updated.getRecurrencePattern());
-                    existing.setNextExecution(updated.getNextExecution());
-                    existing.setRecurrenceEndDate(updated.getRecurrenceEndDate());
-                    existing.setMaxOccurrences(updated.getMaxOccurrences());
-                    existing.setActive(updated.isActive());
+                    if (dto.getCategoryId() != null) {
+                        Category cat = categoryRepository.findById(dto.getCategoryId())
+                                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada"));
+                        existing.setCategory(cat);
+                    }
+
+                    if (dto.getTripId() != null) {
+                        Trip trip = tripRepository.findById(dto.getTripId())
+                                .orElseThrow(() -> new IllegalArgumentException("Viaje no encontrado"));
+                        existing.setTrip(trip);
+                    } else {
+                        existing.setTrip(null);
+                    }
+
+                    // recurrente
+                    existing.setRecurrencePattern(dto.getRecurrencePattern());
+                    existing.setNextExecution(dto.getNextExecution());
+                    existing.setRecurrenceEndDate(dto.getRecurrenceEndDate());
+                    existing.setMaxOccurrences(dto.getMaxOccurrences());
+                    if (dto.getActive() != null) existing.setActive(dto.getActive());
 
                     return recurringTransactionRepository.save(existing);
                 });
     }
+
+
+    // RecurringTransactionService
+    @Transactional
+    public int processDueTransactionsForUser(User user) {
+        LocalDate today = LocalDate.now();
+
+        // Trae solo las recurrentes del usuario que están vencidas o al día de hoy y activas
+        List<RecurringTransaction> due = recurringTransactionRepository
+                .findByUserAndActiveTrueAndNextExecutionLessThanEqual(user, today);
+
+        int created = 0;
+
+        for (RecurringTransaction rt : due) {
+            // Normaliza fechas nulas por si acaso
+            if (rt.getNextExecution() == null) {
+                rt.setNextExecution(calcNextExecution(rt));
+            }
+            if (rt.getExecutedOccurrences() == null) {
+                rt.setExecutedOccurrences(0);
+            }
+
+            // Crea TODAS las ocurrencias pendientes hasta hoy (catch-up)
+            while (rt.isActive()
+                    && !isFinished(rt)
+                    && !rt.getNextExecution().isAfter(today)) {
+
+                // Crear transacción NORMAL fechada en la ejecución programada
+                Transaction newTx = Transaction.builder()
+                        .type(rt.getType())
+                        .amount(rt.getAmount())
+                        .currency(rt.getCurrency())
+                        .date(rt.getNextExecution()) // ← fecha correcta
+                        .description(rt.getDescription())
+                        .user(rt.getUser())          // o 'user' (equivalen)
+                        .trip(rt.getTrip())
+                        .category(rt.getCategory())
+                        .build();
+
+                transactionService.save(newTx);
+                created++;
+
+                // Avanza estado de la recurrente
+                rt.setExecutedOccurrences(rt.getExecutedOccurrences() + 1);
+                rt.setNextExecution(nextDate(rt.getNextExecution(), rt.getRecurrencePattern()));
+
+                if (isFinished(rt)) {
+                    rt.setActive(false);
+                }
+            }
+
+            // Guarda cambios de la recurrente (nextExecution/occurrences/active)
+            recurringTransactionRepository.save(rt);
+        }
+
+        return created;
+    }
+
 }

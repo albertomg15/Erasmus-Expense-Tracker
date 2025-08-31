@@ -1,7 +1,7 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.model.ExchangeRate;
-import com.eet.backend.repository.ExchangeRateRepository;
+import com.eet.backend.repositories.ExchangeRateRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

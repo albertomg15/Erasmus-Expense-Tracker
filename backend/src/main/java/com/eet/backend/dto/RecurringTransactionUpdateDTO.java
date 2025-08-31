@@ -1,5 +1,4 @@
 package com.eet.backend.dto;
-
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
@@ -10,42 +9,19 @@ import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
-
 @Data
-@AllArgsConstructor
-public class RecurringTransactionCreateDTO {
-    @NotNull
+public class RecurringTransactionUpdateDTO {
     private TransactionType type;
-
-    @NotNull @DecimalMin("0.00")
     private BigDecimal amount;
-
-    @NotBlank
     private String currency;
-
-    @NotNull
     private LocalDate date;
-
     private String description;
-
-    // IDs que vienen del front:
-    @NotNull
     private UUID categoryId;
+    private UUID tripId;
 
-    private UUID tripId; // opcional
-
-    // Campos de recurrencia:
-    @NotNull
     private RecurrencePattern recurrencePattern;
-
-    private LocalDate recurrenceStartDate; // puede ser null (usa date)
-    private LocalDate recurrenceEndDate;   // null = indefinida
-
-    @NotNull
     private LocalDate nextExecution;
-
+    private LocalDate recurrenceEndDate;
     private Integer maxOccurrences;
-
-    private Boolean fillPastOccurrences; // getter/setter
-
+    private Boolean active;
 }

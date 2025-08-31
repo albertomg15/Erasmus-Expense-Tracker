@@ -1,11 +1,11 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.BudgetDto;
 import com.eet.backend.dto.BudgetWithSpentDto;
 import com.eet.backend.model.Budget;
 import com.eet.backend.model.User;
-import com.eet.backend.service.BudgetService;
-import com.eet.backend.service.UserService;
+import com.eet.backend.services.BudgetService;
+import com.eet.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

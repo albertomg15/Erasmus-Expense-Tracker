@@ -25,5 +25,10 @@
   "summary": "Summary",
   "totalSpent": "Total Spent",
   "breakdown": "Spending Breakdown",
-  "noExpensesYet": "No expenses yet."
+  "noExpensesYet": "No expenses yet.",
+  "loadError": "Failed to load trip",
+  "itemsPerPage": "Items per page",
+  "showingRange": "Showing {{from}}–{{to}} of {{total}}",
+  "prev": "prev",
+  "next": "next"
 }

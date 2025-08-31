@@ -1,9 +1,9 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.AuthRequest;
 import com.eet.backend.dto.AuthResponse;
 import com.eet.backend.dto.RegisterRequest;
-import com.eet.backend.service.AuthService;
+import com.eet.backend.services.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

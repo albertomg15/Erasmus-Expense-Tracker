@@ -25,5 +25,10 @@
   "summary": "Resumen",
   "totalSpent": "Total gastado",
   "breakdown": "Desglose de gastos",
-  "noExpensesYet": "Aún no hay gastos."
+  "noExpensesYet": "Aún no hay gastos.",
+  "loadError": "Error al cargar el viaje",
+  "itemsPerPage": "Items por página",
+  "showingRange": "Mostrando {{from}}–{{to}} de {{total}}",
+  "prev": "anterior",
+  "next": "siguiente"
 }

@@ -1,4 +1,4 @@
-package com.eet.backend.service.validation;
+package com.eet.backend.services.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;

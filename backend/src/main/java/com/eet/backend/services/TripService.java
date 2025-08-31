@@ -1,13 +1,12 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.TripDto;
 import com.eet.backend.dto.TripRequestDto;
 import com.eet.backend.model.Tag;
 import com.eet.backend.model.Trip;
 import com.eet.backend.model.User;
-import com.eet.backend.repository.TripRepository;
+import com.eet.backend.repositories.TripRepository;
 import jakarta.transaction.Transactional;
-import jakarta.validation.constraints.AssertTrue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

@@ -1,16 +1,14 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.AuthRequest;
 import com.eet.backend.dto.AuthResponse;
 import com.eet.backend.dto.RegisterRequest;
-import com.eet.backend.model.Budget;
 import com.eet.backend.model.User;
 import com.eet.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Service

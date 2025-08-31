@@ -33,7 +33,7 @@
 
   "stat": {
     "income": "Income",
-    "expenses": "Expenses",
+    "expense": "Expenses",
     "balance": "Balance"
   },
   "budget": {

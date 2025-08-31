@@ -1,8 +1,8 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.*;
 import com.eet.backend.model.ExchangeRate;
-import com.eet.backend.service.ExchangeRateService;
+import com.eet.backend.services.ExchangeRateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

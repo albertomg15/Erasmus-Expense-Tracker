@@ -1,4 +1,4 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.ExchangeRateDto;
 import com.eet.backend.model.ExchangeRate;
@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,21 @@ public class ExchangeRateService {
     // private static final String accessKey = "f1d140295f63ab70c61484219b256eec";
 
     // Desactivado: solo si necesitas listar todo
+
+    private static final int SCALE = 6;
+
+    // EUR como divisa base
+    private static final Map<String, BigDecimal> EUR_BASE_RATES = Map.ofEntries(
+            Map.entry("EUR", BigDecimal.ONE),
+            Map.entry("USD", new BigDecimal("1.10")),
+            Map.entry("GBP", new BigDecimal("0.85")),
+            Map.entry("JPY", new BigDecimal("157.50")),
+            Map.entry("CHF", new BigDecimal("0.96")),
+            Map.entry("CAD", new BigDecimal("1.47")),
+            Map.entry("MXN", new BigDecimal("18.20")),
+            Map.entry("PLN", new BigDecimal("4.32"))
+    );
+
     public List<ExchangeRate> getAll() {
         return List.of(); // exchangeRateRepository.findAll();
     }
@@ -94,43 +110,46 @@ public class ExchangeRateService {
         return getHardcodedRate(from, to);
     }
 
-    private Optional<ExchangeRate> getHardcodedRate(String from, String to) {
-        from = from.toUpperCase();
-        to = to.toUpperCase();
+    public static Set<String> getSupportedCurrencies() {
+        return EUR_BASE_RATES.keySet();
+    }
 
-        if (from.equals(to)) {
-            return Optional.of(ExchangeRate.builder()
-                    .fromCurrency(from)
-                    .toCurrency(to)
-                    .rate(BigDecimal.ONE)
-                    .date(LocalDate.now())
-                    .build());
-        }
+    /** Devuelve la tasa hardcodeada entre 'from' y 'to' (si ambas están soportadas). */
+    public static Optional<ExchangeRate> getHardcodedRate(String from, String to) {
+        if (from == null || to == null) return Optional.empty();
+        from = from.toUpperCase(Locale.ROOT);
+        to   = to.toUpperCase(Locale.ROOT);
 
-        Map<String, BigDecimal> eurRates = Map.of(
-                "USD", new BigDecimal("1.10"),
-                "GBP", new BigDecimal("0.85"),
-                "JPY", new BigDecimal("157.50"),
-                "CHF", new BigDecimal("0.96"),
-                "CAD", new BigDecimal("1.47"),
-                "MXN", new BigDecimal("18.20"),
-                "PLN", new BigDecimal("4.32")
-        );
+        BigDecimal fromRate = EUR_BASE_RATES.get(from);
+        BigDecimal toRate   = EUR_BASE_RATES.get(to);
+        if (fromRate == null || toRate == null) return Optional.empty();
 
-        BigDecimal fromRate = from.equals("EUR") ? BigDecimal.ONE : eurRates.get(from);
-        BigDecimal toRate = to.equals("EUR") ? BigDecimal.ONE : eurRates.get(to);
-
-        if (fromRate == null || toRate == null) {
-            return Optional.empty();
-        }
-
-        BigDecimal conversionRate = toRate.divide(fromRate, 6, RoundingMode.HALF_UP);
+        BigDecimal rate = toRate.divide(fromRate, SCALE, RoundingMode.HALF_UP);
 
         return Optional.of(ExchangeRate.builder()
                 .fromCurrency(from)
                 .toCurrency(to)
-                .rate(conversionRate)
+                .rate(rate)
                 .date(LocalDate.now())
                 .build());
+    }
+
+    /** Devuelve TODAS las combinaciones soportadas (8x8 = 64 pares, incl. identidad). */
+    public static List<ExchangeRate> getAllHardcodedRates() {
+        LocalDate today = LocalDate.now();
+        List<String> codes = new ArrayList<>(EUR_BASE_RATES.keySet());
+
+        return codes.stream()
+                .flatMap(from -> codes.stream().map(to -> {
+                    BigDecimal rate = EUR_BASE_RATES.get(to)
+                            .divide(EUR_BASE_RATES.get(from), SCALE, RoundingMode.HALF_UP);
+                    return ExchangeRate.builder()
+                            .fromCurrency(from)
+                            .toCurrency(to)
+                            .rate(rate)
+                            .date(today)
+                            .build();
+                }))
+                .toList();
     }
 }

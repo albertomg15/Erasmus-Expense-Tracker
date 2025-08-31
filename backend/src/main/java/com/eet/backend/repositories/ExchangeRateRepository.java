@@ -1,4 +1,4 @@
-package com.eet.backend.repository;
+package com.eet.backend.repositories;
 
 import com.eet.backend.model.ExchangeRate;
 import org.springframework.data.jpa.repository.JpaRepository;

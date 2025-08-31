@@ -6,6 +6,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-[#E6F0FA] flex flex-col items-center justify-center text-center p-6">
+      {/* Contenido central */}
       <h1 className="text-4xl sm:text-5xl font-bold text-[#0056B3] mb-12">
         Erasmus Expense Tracker
       </h1>
@@ -23,6 +24,17 @@ export default function Landing() {
         >
           {t("signup")}
         </Link>
+      </div>
+
+      {/* Texto LOPD más abajo */}
+      <div className="mt-20 text-sm text-gray-700">
+        {t("lopdNotice")}{" "}
+        <a
+          href="mailto:amelgar1@etsinf.upv.es "
+          className="text-[#0056B3] underline"
+        >
+         amelgar1@etsinf.upv.es 
+                  </a>
       </div>
     </div>
   );

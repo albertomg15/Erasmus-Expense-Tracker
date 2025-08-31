@@ -1,10 +1,10 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.TagDto;
 import com.eet.backend.model.Tag;
 import com.eet.backend.model.User;
-import com.eet.backend.service.TagService;
-import com.eet.backend.service.UserService;
+import com.eet.backend.services.TagService;
+import com.eet.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

@@ -1,9 +1,8 @@
-package com.eet.backend.repository;
+package com.eet.backend.repositories;
 
 import com.eet.backend.model.CountrySpendingStats;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package com.eet.backend.repository;
+package com.eet.backend.repositories;
 
 import com.eet.backend.model.Budget;
 import com.eet.backend.model.User;

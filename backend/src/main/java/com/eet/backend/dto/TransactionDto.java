@@ -17,9 +17,13 @@ public class TransactionDto {
     private String currency;
     private String categoryName;
     private String categoryEmoji;
+    private UUID categoryId;
     private LocalDate date;
     private String description;
     private UUID tripId;
+    private Boolean recurring;
+    private String  recurrencePattern;
+    private LocalDate nextExecution;
     private String tripName; // nuevo campo opcional
     private BigDecimal convertedAmount; // cantidad en moneda preferida del usuario
     private String convertedCurrency;   // ISO de la moneda preferida

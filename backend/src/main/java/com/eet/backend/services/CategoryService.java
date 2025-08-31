@@ -1,10 +1,9 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.CategoryDto;
 import com.eet.backend.model.Category;
-import com.eet.backend.model.User;
-import com.eet.backend.repository.CategoryRepository;
-import com.eet.backend.repository.TransactionRepository;
+import com.eet.backend.repositories.CategoryRepository;
+import com.eet.backend.repositories.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

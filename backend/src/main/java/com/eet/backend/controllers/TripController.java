@@ -1,22 +1,26 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.TransactionDto;
 import com.eet.backend.dto.TripDto;
 import com.eet.backend.dto.TripRequestDto;
+import com.eet.backend.model.Tag;
 import com.eet.backend.model.Transaction;
 import com.eet.backend.model.Trip;
 import com.eet.backend.model.User;
-import com.eet.backend.service.ExchangeRateService;
-import com.eet.backend.service.TagService;
-import com.eet.backend.service.TripService;
-import com.eet.backend.service.UserService;
+import com.eet.backend.services.ExchangeRateService;
+import com.eet.backend.services.TagService;
+import com.eet.backend.services.TripService;
+import com.eet.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,6 +37,7 @@ public class TripController {
 
     // 🔹 Obtener todos los viajes de un usuario (convertidos a DTO)
     @GetMapping("/user/{userId}")
+    @PreAuthorize("@authz.isSelf(#userId)")
     public ResponseEntity<List<TripDto>> getByUserId(@PathVariable UUID userId) {
         List<Trip> trips = tripService.getByUserId(userId);
         List<TripDto> tripDtos = trips.stream()
@@ -128,6 +133,7 @@ public class TripController {
                 .endDate(trip.getEndDate())
                 .estimatedBudget(trip.getEstimatedBudget())
                 .notes(trip.getNotes())
+                .currency(trip.getCurrency())
                 .tags(
                         trip.getTags() != null
                                 ? trip.getTags().stream().map(tag -> tag.getName()).toList()
@@ -190,12 +196,17 @@ public class TripController {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         if (dto.getTags() != null) {
-            existing.setTags(
-                    dto.getTags().stream()
-                            .map(tagName -> tagService.findOrCreate(tagName, user))
-                            .toList()
-            );
+            List<Tag> resolved = tagService.findOrCreateAll(dto.getTags(), user);
+
+            if (existing.getTags() == null) {
+                existing.setTags(new ArrayList<>(resolved));
+            } else {
+                existing.getTags().clear();
+                existing.getTags().addAll(resolved);
+            }
         }
+// si dto.getTags() == null -> no tocar los tags existentes
+
 
         Trip updated = tripService.save(existing);
         return ResponseEntity.ok(toDto(updated));

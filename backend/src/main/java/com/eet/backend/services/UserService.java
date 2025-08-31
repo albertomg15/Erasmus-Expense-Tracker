@@ -1,7 +1,8 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
+import com.eet.backend.dto.UserResponse;
 import com.eet.backend.model.User;
-import com.eet.backend.repository.UserRepository;
+import com.eet.backend.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -35,6 +36,18 @@ public class UserService {
                 .build();
 
         return userRepository.save(user);
+    }
+
+
+    public UserResponse toResponse(User u) {
+        UserResponse r = new UserResponse();
+        r.setUserId(u.getUserId());
+        r.setEmail(u.getEmail());
+        r.setPreferredCurrency(u.getPreferredCurrency());
+        r.setLanguage(u.getLanguage());
+        r.setCountry(u.getCountry());
+        r.setConsentToDataAnalysis(u.getConsentToDataAnalysis());
+        return r;
     }
 
     public boolean authenticate(String email, String password) {

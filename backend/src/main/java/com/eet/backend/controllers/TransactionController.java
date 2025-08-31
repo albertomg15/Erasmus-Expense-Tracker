@@ -1,8 +1,8 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.*;
 import com.eet.backend.model.*;
-import com.eet.backend.service.*;
+import com.eet.backend.services.*;
 //import com.eet.backend.service.ExchangeRateInitializer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +25,9 @@ public class TransactionController {
     private final UserService userService;
     private final BudgetService budgetService;
     private final ExchangeRateService exchangeRateService;
-   // private final ExchangeRateInitializer exchangeRateInitializer;
+    private final RecurringTransactionService recurringTransactionService;
+
+    // private final ExchangeRateInitializer exchangeRateInitializer;
 
     // ==================== UTIL ====================
     private User getAuthenticatedUser(UserDetails userDetails) {
@@ -37,6 +39,8 @@ public class TransactionController {
     @GetMapping
     public ResponseEntity<List<TransactionDto>> getAllTransactions(@AuthenticationPrincipal UserDetails userDetails) {
         User user = getAuthenticatedUser(userDetails);
+        recurringTransactionService.processDueTransactionsForUser(user); // <-- NUEVO
+
         List<Transaction> transactions = transactionService.getAllByUserId(user.getUserId());
 
         List<TransactionDto> dtos = transactions.stream()
@@ -143,8 +147,8 @@ public class TransactionController {
     @PostMapping("/process-recurring")
     public ResponseEntity<String> processRecurringTransactionsManually(
             @AuthenticationPrincipal UserDetails userDetails) {
-        getAuthenticatedUser(userDetails); // valida usuario
-        int processed = transactionService.processDueRecurringTransactions();
+        getAuthenticatedUser(userDetails);
+        int processed = recurringTransactionService.processDueTransactions();
         return ResponseEntity.ok("Processed " + processed + " recurring transactions.");
     }
 
@@ -169,6 +173,8 @@ public class TransactionController {
                 + tx.getCurrency() + " → " + user.getPreferredCurrency()));
 
         BigDecimal convertedAmount = tx.getAmount().multiply(rate.getRate());
+        boolean isRecurring = tx instanceof RecurringTransaction;
+        RecurringTransaction rtx = isRecurring ? (RecurringTransaction) tx : null;
 
         return TransactionDto.builder()
                 .transactionId(tx.getTransactionId())
@@ -177,12 +183,16 @@ public class TransactionController {
                 .currency(tx.getCurrency())
                 .convertedAmount(convertedAmount)
                 .convertedCurrency(user.getPreferredCurrency())
+                .categoryId(tx.getCategory() != null ? tx.getCategory().getCategoryId() : null)
                 .categoryName(tx.getCategory() != null ? tx.getCategory().getName() : null)
                 .categoryEmoji(tx.getCategory() != null ? tx.getCategory().getEmoji() : null)
                 .date(tx.getDate())
                 .description(tx.getDescription())
                 .tripId(tx.getTrip() != null ? tx.getTrip().getTripId() : null)
                 .tripName(tx.getTrip() != null ? tx.getTrip().getName() : null)
+                .recurring(isRecurring)
+                .recurrencePattern(isRecurring ? rtx.getRecurrencePattern().name() : null)
+                .nextExecution(isRecurring ? rtx.getNextExecution() : null)
                 .build();
     }
 

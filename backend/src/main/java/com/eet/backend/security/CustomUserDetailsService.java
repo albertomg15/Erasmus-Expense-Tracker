@@ -1,7 +1,7 @@
 package com.eet.backend.security;
 
 import com.eet.backend.model.User;
-import com.eet.backend.repository.UserRepository;
+import com.eet.backend.repositories.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;

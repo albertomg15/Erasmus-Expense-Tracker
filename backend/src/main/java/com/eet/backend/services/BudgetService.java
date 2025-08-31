@@ -1,11 +1,11 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.BudgetDto;
 import com.eet.backend.dto.BudgetWithSpentDto;
 import com.eet.backend.model.Budget;
 import com.eet.backend.model.User;
-import com.eet.backend.repository.BudgetRepository;
-import com.eet.backend.repository.TransactionRepository;
+import com.eet.backend.repositories.BudgetRepository;
+import com.eet.backend.repositories.TransactionRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

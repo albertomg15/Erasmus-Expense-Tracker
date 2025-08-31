@@ -1,10 +1,11 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.RecurringTransactionCreateDTO;
+import com.eet.backend.dto.RecurringTransactionUpdateDTO;
 import com.eet.backend.model.RecurringTransaction;
 import com.eet.backend.model.User;
-import com.eet.backend.service.RecurringTransactionService;
-import com.eet.backend.service.UserService;
+import com.eet.backend.services.RecurringTransactionService;
+import com.eet.backend.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -61,15 +62,18 @@ public class RecurringTransactionController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<RecurringTransaction> updateRecurringTransaction(@PathVariable UUID id,
-                                                                           @RequestBody RecurringTransaction updatedTransaction,
-                                                                           @AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<RecurringTransaction> updateRecurringTransaction(
+            @PathVariable UUID id,
+            @RequestBody RecurringTransactionUpdateDTO dto,
+            @AuthenticationPrincipal UserDetails userDetails) {
+
         User user = userService.getByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        return recurringTransactionService.update(id, updatedTransaction, user)
+        return recurringTransactionService.updateFromDto(id, dto, user)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
 
 }

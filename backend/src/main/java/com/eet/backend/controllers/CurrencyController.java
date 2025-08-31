@@ -1,4 +1,4 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.config.CurrencyConfig;
 import lombok.RequiredArgsConstructor;

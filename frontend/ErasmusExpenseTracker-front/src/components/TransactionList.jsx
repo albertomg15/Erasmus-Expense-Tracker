@@ -10,10 +10,13 @@ export default function TransactionList({ transactions, onDelete }) {
 
   const handleDelete = async () => {
     const tx = selectedTransaction;
-    const confirmed = window.confirm(t("confirmDelete", { defaultValue: "Are you sure you want to delete this transaction?" }));
+    const confirmed = window.confirm(
+      t("confirmDelete", { defaultValue: "Are you sure you want to delete this transaction?" })
+    );
     if (!confirmed) return;
     try {
-      if (tx.recurrencePattern) {
+      const isRecurring = tx?.isRecurring ?? !!tx?.recurrencePattern;
+      if (isRecurring) {
         await deleteRecurringTransaction(tx.transactionId);
       } else {
         await deleteTransaction(tx.transactionId);
@@ -31,27 +34,20 @@ export default function TransactionList({ transactions, onDelete }) {
       <ul className="divide-y">
         {transactions.map((tx) => {
           const isIncome = tx.type === "INCOME";
-          const isRecurring = !!tx.recurrencePattern;
+          const isRecurring = tx.isRecurring ?? !!tx.recurrencePattern;
+          const isActive = tx.active ?? true;
+
           const categoryName = tx.categoryEmoji
             ? `${tx.categoryEmoji} ${tx.categoryName}`
             : tx.categoryName || tx.category?.name || t("uncategorized", { defaultValue: "Uncategorized" });
 
           const dateFormatted = new Date(tx.date).toLocaleDateString();
 
-          const amountFormatted = isRecurring
-            ? tx.active
-              ? `${t("nextExecution")}: ${new Date(tx.nextExecution).toLocaleDateString()}`
-              : t("cancelled", { defaultValue: "Cancelled" })
-            : `${isIncome ? "+" : "-"}${formatCurrency(tx.amount, tx.currency)
-}`;
-
+          // Importe principal (gris si recurrente; tachado si inactiva)
+          const amountTop = `${isRecurring ? "" : (isIncome ? "+" : "-")}${formatCurrency(tx.amount, tx.currency)}`;
           const amountClass = isRecurring
-            ? tx.active
-              ? "text-blue-600"
-              : "text-red-600"
-            : isIncome
-              ? "text-green-600"
-              : "text-red-600";
+            ? (isActive ? "text-gray-600" : "text-gray-400 line-through")
+            : (isIncome ? "text-green-600" : "text-red-600");
 
           return (
             <li
@@ -62,7 +58,19 @@ export default function TransactionList({ transactions, onDelete }) {
               <div>
                 <div className="flex gap-2 items-center">
                   <strong>{tx.description}</strong>
-                  {isRecurring && <span title={t("recurring")}>🔁</span>}
+                  {isRecurring && (
+                    <>
+                      <span title={t("recurring")}>🔁</span>
+                      <span className="text-[10px] uppercase bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
+                        {t("recurring")}
+                      </span>
+                      {!isActive && (
+                        <span className="text-[10px] uppercase bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                          {t("inactive", { defaultValue: "Inactive" })}
+                        </span>
+                      )}
+                    </>
+                  )}
                 </div>
                 <span className="text-sm text-gray-500">({categoryName})</span>
                 {tx.tripName && (
@@ -71,15 +79,27 @@ export default function TransactionList({ transactions, onDelete }) {
                   </div>
                 )}
               </div>
-              <div className="text-right">
-                <div className={`font-semibold ${amountClass}`}>{amountFormatted}</div>
 
-                  {/* Mostramos conversión si hay diferencia de moneda */}
-                  {tx.currency !== tx.convertedCurrency && tx.convertedAmount != null && (
-                    <div className="text-xs text-gray-500 italic">
-                      ≈ {formatCurrency(tx.convertedAmount, tx.convertedCurrency)}
-                    </div>
-                  )}
+              <div className="text-right">
+                <div className={`font-semibold ${amountClass}`}>{amountTop}</div>
+
+                {/* Si es recurrente, mostrar próxima ejecución o "Inactive" en el ÍTEM */}
+                {isRecurring && (
+                  <div className="text-xs text-gray-500">
+                    {isActive
+                      ? `${t("nextExecution")}: ${
+                          tx.nextExecution ? new Date(tx.nextExecution).toLocaleDateString() : "—"
+                        }`
+                      : t("inactive", { defaultValue: "Inactive" })}
+                  </div>
+                )}
+
+                {/* Conversión de moneda (gris e itálica para recurrentes también) */}
+                {tx.currency !== tx.convertedCurrency && tx.convertedAmount != null && (
+                  <div className={`text-xs italic ${isRecurring ? "text-gray-400" : "text-gray-500"}`}>
+                    ≈ {formatCurrency(tx.convertedAmount, tx.convertedCurrency)}
+                  </div>
+                )}
 
                 <div className="text-xs text-gray-500">{dateFormatted}</div>
               </div>
@@ -97,36 +117,51 @@ export default function TransactionList({ transactions, onDelete }) {
             >
               ✕
             </button>
-            <h2 className="text-xl font-bold mb-4">{t("details", { defaultValue: "Transaction Details" })}</h2>
+            <h2 className="text-xl font-bold mb-4">
+              {t("details", { defaultValue: "Transaction Details" })}
+            </h2>
             <div className="space-y-2 text-sm">
               <div><strong>{t("description")}:</strong> {selectedTransaction.description}</div>
               <div><strong>{t("amount")}:</strong> {formatCurrency(selectedTransaction.amount, selectedTransaction.currency)}</div>
               <div><strong>{t("type")}:</strong> {t(selectedTransaction.type.toLowerCase())}</div>
               <div><strong>{t("date")}:</strong> {new Date(selectedTransaction.date).toLocaleDateString()}</div>
-              <div><strong>{t("category")}:</strong> {selectedTransaction.category?.name || t("uncategorized")}</div>
+              <div><strong>{t("category")}:</strong> {selectedTransaction.categoryName || t("uncategorized")}</div>
               {selectedTransaction.tripName && (
                 <div><strong>{t("associatedTripOptional")}:</strong> {selectedTransaction.tripName}</div>
               )}
-              {selectedTransaction.recurrencePattern && (
+              {(selectedTransaction.isRecurring ?? !!selectedTransaction.recurrencePattern) && (
                 <>
                   <hr className="my-2" />
-                  <div><strong>{t("recurrencePattern")}:</strong> {t(selectedTransaction.recurrencePattern.toLowerCase())}</div>
-                  <div><strong>{t("nextExecution")}:</strong> {new Date(selectedTransaction.nextExecution).toLocaleDateString()}</div>
+                  <div>
+                    <strong>{t("recurrencePattern")}:</strong>{" "}
+                    {t(selectedTransaction.recurrencePattern?.toLowerCase() || "recurring")}
+                  </div>
+                  <div>
+                    <strong>{t("nextExecution")}:</strong>{" "}
+                    {selectedTransaction.active
+                      ? (selectedTransaction.nextExecution
+                          ? new Date(selectedTransaction.nextExecution).toLocaleDateString()
+                          : "—")
+                      : t("inactive", { defaultValue: "Inactive" })}
+                  </div>
                   {selectedTransaction.recurrenceEndDate && (
-                    <div><strong>{t("recurrenceEndDate")}:</strong> {new Date(selectedTransaction.recurrenceEndDate).toLocaleDateString()}</div>
+                    <div>
+                      <strong>{t("recurrenceEndDate")}:</strong>{" "}
+                      {new Date(selectedTransaction.recurrenceEndDate).toLocaleDateString()}
+                    </div>
                   )}
-                  <div><strong>{t("maxOccurrences")}:</strong> {selectedTransaction.executedOccurrences}</div>
-                  <div><strong>{t("active")}:</strong> {selectedTransaction.active ? t("active") : t("inactive", { defaultValue: "Inactive" })}</div>
+                  <div>
+                    <strong>{t("active")}:</strong>{" "}
+                    {selectedTransaction.active
+                      ? t("active")
+                      : t("inactive", { defaultValue: "Inactive" })}
+                  </div>
                 </>
               )}
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <button
-                onClick={() => {
-                  console.log("Selected transaction:", selectedTransaction);
-
-                  window.location.href = `/transactions/edit/${selectedTransaction.transactionId}`;
-                }}
+                onClick={() => (window.location.href = `/transactions/edit/${selectedTransaction.transactionId}`)}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 {t("editTitle")}

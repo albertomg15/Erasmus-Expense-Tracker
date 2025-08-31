@@ -1,6 +1,6 @@
 package com.eet.backend.scheduler;
 
-import com.eet.backend.service.CountrySpendingStatsService;
+import com.eet.backend.services.CountrySpendingStatsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;

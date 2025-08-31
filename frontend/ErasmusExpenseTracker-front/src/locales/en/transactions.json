@@ -76,7 +76,15 @@
     "next": "Next",
     "page": "Page",
     "of": "of"
-  }
+  },
+  "amountPositive": "Amount must be a positive number.",
+  "currencyRequired": "Currency is required.",
+  "categoryRequired": "Category is required.",
+  "dateRequired": "Date is required.",
+  "recurringCatchUpTitle": "Create past occurrences?",
+  "recurringCatchUpBody": "We found {{count}} past executions between {{first}} and {{last}}. Do you want to create them now?",
+  "yes": "Yes",
+  "no": "No"
 }
 
   

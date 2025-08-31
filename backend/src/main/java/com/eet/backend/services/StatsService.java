@@ -1,8 +1,8 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.stats.*;
 import com.eet.backend.model.*;
-import com.eet.backend.repository.*;
+import com.eet.backend.repositories.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

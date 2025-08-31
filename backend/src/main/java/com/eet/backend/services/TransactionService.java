@@ -1,14 +1,14 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.dto.DashboardDto;
 import com.eet.backend.dto.DashboardSummaryDto;
 import com.eet.backend.dto.SummaryDto;
 import com.eet.backend.dto.TransactionDto;
 import com.eet.backend.model.*;
-import com.eet.backend.repository.BudgetRepository;
-import com.eet.backend.repository.RecurringTransactionRepository;
-import com.eet.backend.repository.TransactionRepository;
-import com.eet.backend.repository.TripRepository;
+import com.eet.backend.repositories.BudgetRepository;
+import com.eet.backend.repositories.RecurringTransactionRepository;
+import com.eet.backend.repositories.TransactionRepository;
+import com.eet.backend.repositories.TripRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -17,8 +17,6 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,8 +31,6 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
 
     private final BudgetRepository budgetRepository;
-
-    private final RecurringTransactionRepository recurringTransactionRepository;
 
     private final TripRepository tripRepository;
 
@@ -220,46 +216,12 @@ public class TransactionService {
 
 
 
+    // TransactionService
     public int processDueRecurringTransactions() {
-        LocalDate today = LocalDate.now();
-        List<RecurringTransaction> dueTransactions =
-                recurringTransactionRepository.findByActiveTrueAndNextExecutionLessThanEqual(today);
-
-        int count = 0;
-
-        for (RecurringTransaction recurring : dueTransactions) {
-            Transaction tx = Transaction.builder()
-                    .type(recurring.getType())
-                    .amount(recurring.getAmount())
-                    .currency(recurring.getCurrency())
-                    .date(today)
-                    .description(recurring.getDescription())
-                    .user(recurring.getUser())
-                    .trip(recurring.getTrip())
-                    .category(recurring.getCategory())
-                    .build();
-
-            transactionRepository.save(tx);
-
-            recurring.setExecutedOccurrences(recurring.getExecutedOccurrences() + 1);
-            recurring.setNextExecution(getNextExecutionDate(recurring.getNextExecution(), recurring.getRecurrencePattern()));
-
-            boolean expiredByDate = recurring.getRecurrenceEndDate() != null &&
-                    recurring.getNextExecution().isAfter(recurring.getRecurrenceEndDate());
-
-            boolean expiredByCount = recurring.getMaxOccurrences() != null &&
-                    recurring.getExecutedOccurrences() >= recurring.getMaxOccurrences();
-
-            if (expiredByDate || expiredByCount) {
-                recurring.setActive(false);
-            }
-
-            recurringTransactionRepository.save(recurring);
-            count++;
-        }
-
-        return count;
+        throw new UnsupportedOperationException("Use RecurringTransactionService.processDueTransactions()");
     }
+
+
 
 
     private LocalDate getNextExecutionDate(LocalDate current, RecurrencePattern pattern) {

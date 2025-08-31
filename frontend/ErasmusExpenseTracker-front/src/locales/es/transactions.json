@@ -72,5 +72,15 @@
     "next": "Siguiente",
     "page": "Página",
     "of": "de"
-  }
+  },
+  "amountPositive": "El importe debe ser un número positivo.",
+  "currencyRequired": "La moneda es obligatoria.",
+  "categoryRequired": "La categoría es obligatoria.",
+  "dateRequired": "La fecha es obligatoria.",
+  "recurringCatchUpTitle": "¿Crear las ejecuciones pasadas?",
+  "recurringCatchUpBody": "Hemos encontrado {{count}} ejecuciones pasadas entre {{first}} y {{last}}. ¿Quieres crearlas ahora?",
+  "yes": "Sí",
+  "no": "No"
+
+
 }

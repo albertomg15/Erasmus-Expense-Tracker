@@ -1,13 +1,15 @@
-package com.eet.backend.service;
+package com.eet.backend.services;
 
 import com.eet.backend.model.Tag;
 import com.eet.backend.model.User;
-import com.eet.backend.repository.TagRepository;
+import com.eet.backend.repositories.TagRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -26,6 +28,21 @@ public class TagService {
                 .orElseGet(() -> tagRepository.save(
                         Tag.builder().name(name).user(user).build()
                 ));
+    }
+
+    @Transactional
+    public List<Tag> findOrCreateAll(Collection<String> names, User user) {
+        return names.stream()
+                .filter(Objects::nonNull)
+                .map(this::normalize)
+                .filter(s -> !s.isBlank())
+                .distinct() // evita duplicados en la misma petición
+                .map(n -> findOrCreate(n, user))
+                .toList();
+    }
+
+    private String normalize(String s) {
+        return s == null ? null : s.trim(); // si quieres, añade `.toLowerCase(Locale.ROOT)`
     }
 
     public List<Tag> findByUserId(UUID userId) {

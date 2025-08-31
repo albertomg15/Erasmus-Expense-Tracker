@@ -1,9 +1,10 @@
-package com.eet.backend.controller;
+package com.eet.backend.controllers;
 
 import com.eet.backend.dto.ChangePasswordRequest;
 import com.eet.backend.dto.UserProfileUpdateDto;
+import com.eet.backend.dto.UserResponse;
 import com.eet.backend.model.User;
-import com.eet.backend.service.UserService;
+import com.eet.backend.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,29 +20,24 @@ public class UserController {
     private final UserService userService;
 
     @PutMapping("/password")
-    public ResponseEntity<Void> changePassword(@RequestBody ChangePasswordRequest request,
+    public ResponseEntity<Void> changePassword(@RequestBody @Valid ChangePasswordRequest request,
                                                @AuthenticationPrincipal UserDetails userDetails) {
         User user = userService.getByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
         userService.changePassword(user, request.getCurrentPassword(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<User> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<UserResponse> getCurrentUser(@AuthenticationPrincipal UserDetails userDetails) {
         return userService.getByEmail(userDetails.getUsername())
-                .map(ResponseEntity::ok)
+                .map(u -> ResponseEntity.ok(userService.toResponse(u)))
                 .orElse(ResponseEntity.notFound().build());
     }
 
-
-
     @PutMapping
-    public ResponseEntity<User> updateUser(
-            @AuthenticationPrincipal UserDetails userDetails,
-            @RequestBody @Valid UserProfileUpdateDto dto
-    ) {
+    public ResponseEntity<UserResponse> updateUser(@AuthenticationPrincipal UserDetails userDetails,
+                                                   @RequestBody @Valid UserProfileUpdateDto dto) {
         User user = userService.getByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -50,9 +46,7 @@ public class UserController {
         user.setCountry(dto.getCountry());
         user.setConsentToDataAnalysis(dto.isConsentToDataAnalysis());
 
-        return ResponseEntity.ok(userService.save(user));
+        User saved = userService.save(user);
+        return ResponseEntity.ok(userService.toResponse(saved));
     }
-
 }
-
-
