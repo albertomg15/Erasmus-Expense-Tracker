@@ -3,6 +3,7 @@ package com.eet.backend.services;
 import com.eet.backend.dto.CountryComparisonDto;
 import com.eet.backend.dto.CountryComparisonResponse;
 import com.eet.backend.model.CountrySpendingStats;
+import com.eet.backend.model.RecurringTransaction;
 import com.eet.backend.model.Transaction;
 import com.eet.backend.model.TransactionType;
 import com.eet.backend.model.User;
@@ -57,6 +58,10 @@ public class CountrySpendingStatsService {
             Map.entry("MX", "MXN")
     );
 
+    // Excluye plantillas de transacciones recurrentes
+    private static boolean isRecurringTemplate(Transaction tx) {
+        return tx instanceof RecurringTransaction;
+    }
 
     public void addUserAverage(String country, String category, BigDecimal userAvg) {
         statsRepo.findByCountryAndCategory(country, category).ifPresentOrElse(
@@ -97,16 +102,14 @@ public class CountrySpendingStatsService {
             String countryCurrency = COUNTRY_CURRENCY_MAP.get(country);
 
             List<Transaction> userTxs = transactionRepository.findByUserAndTypeAndDateBetween(
-                            user,
-                            TransactionType.EXPENSE,
-                            start,
-                            end
-                    ).stream()
+                            user, TransactionType.EXPENSE, start, end)
+                    .stream()
+                    .filter(tx -> !isRecurringTemplate(tx))
                     .filter(tx -> tx.getCategory() != null && tx.getCategory().isDefault())
-                    .filter(tx -> tx.getTrip() == null) // excluimos transacciones asociadas a viajes
+                    .filter(tx -> tx.getTrip() == null) // excluye gastos de viaje
                     .collect(Collectors.toList());
 
-            if (userTxs.size() < 3) continue; // umbral mínimo de datos
+            if (userTxs.size() < 3) continue; // umbral mínimo
 
             Map<String, List<Transaction>> byCategory = userTxs.stream()
                     .collect(Collectors.groupingBy(tx -> tx.getCategory().getName()));
@@ -115,14 +118,13 @@ public class CountrySpendingStatsService {
                 String category = entry.getKey();
                 List<Transaction> txsInCategory = entry.getValue();
 
-                // conversión a la moneda del país
                 BigDecimal totalConverted = txsInCategory.stream()
                         .map(tx -> exchangeRateService.convert(tx.getAmount(), tx.getCurrency(), countryCurrency))
                         .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                BigDecimal userAverage = totalConverted.divide(BigDecimal.valueOf(txsInCategory.size()), 2, RoundingMode.HALF_UP);
+                BigDecimal userAverage = totalConverted
+                        .divide(BigDecimal.valueOf(txsInCategory.size()), 2, RoundingMode.HALF_UP);
 
-                // actualizar estadísticas del país
                 addUserAverage(country, category, userAverage);
             }
         }
@@ -132,15 +134,18 @@ public class CountrySpendingStatsService {
         String country = user.getCountry();
         String currency = COUNTRY_CURRENCY_MAP.get(country);
 
-        if (country == null || currency == null) return new CountryComparisonResponse(true, List.of());
+        if (country == null || currency == null) {
+            return new CountryComparisonResponse(true, List.of());
+        }
 
         YearMonth selectedMonth = YearMonth.of(year, month);
         LocalDate start = selectedMonth.atDay(1);
         LocalDate end = selectedMonth.atEndOfMonth();
 
         List<Transaction> txs = transactionRepository.findByUserAndTypeAndDateBetween(
-                        user, TransactionType.EXPENSE, start, end
-                ).stream()
+                        user, TransactionType.EXPENSE, start, end)
+                .stream()
+                .filter(tx -> !isRecurringTemplate(tx))
                 .filter(tx -> tx.getCategory() != null && tx.getCategory().isDefault())
                 .filter(tx -> tx.getTrip() == null)
                 .toList();
@@ -159,10 +164,9 @@ public class CountrySpendingStatsService {
                         )
                 ));
 
-        // normalizamos claves para evitar problemas de formato
         Map<String, BigDecimal> userAvgByCategoryNormalized = userAvgByCategory.entrySet().stream()
                 .collect(Collectors.toMap(
-                        entry -> entry.getKey().trim().toUpperCase(),
+                        e -> e.getKey().trim().toUpperCase(),
                         Map.Entry::getValue
                 ));
 
@@ -181,9 +185,4 @@ public class CountrySpendingStatsService {
 
         return new CountryComparisonResponse(incomplete, comparisons);
     }
-
-
-
-
-
 }
