@@ -4,7 +4,6 @@ import { getUserInfo, updateUser } from "../services/userService";
 import { changePassword } from "../services/userService";
 import toast from "react-hot-toast";
 import { useTranslation } from "react-i18next";
-import i18n from "../i18n";
 import { getSupportedCurrencies } from "../services/exchangeRateService";
 
 
@@ -22,7 +21,7 @@ const [loadError, setLoadError] = useState(false);
   const [confirmPassword, setConfirmPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [showPasswordForm, setShowPasswordForm] = useState(false);
-  const { t, i18n } = useTranslation("profile");
+const { t, i18n } = useTranslation(["profile","common"]);
   const [availableCurrencies, setAvailableCurrencies] = useState([]);
 const [showConsentInfo, setShowConsentInfo] = useState(false);
 const consentInfoRef = useRef(null);
@@ -145,8 +144,12 @@ useEffect(() => {
               editing ? "bg-white" : "bg-gray-100 text-gray-500"
             }`}
           >
-            <option value="en">English</option>
-            <option value="es">Español</option>
+              <option value="en">English</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="vl">Valencià</option>
+              <option value="pl">Polski</option>
+
           </select>
         </div>
 

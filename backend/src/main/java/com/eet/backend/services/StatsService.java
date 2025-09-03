@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
@@ -24,6 +25,10 @@ public class StatsService {
     private final TripRepository tripRepository;
     private final ExchangeRateService exchangeRateService;
 
+    // Excluye plantillas de transacciones recurrentes de todos los cálculos
+    private static boolean isRecurringTemplate(Transaction tx) {
+        return tx instanceof RecurringTransaction;
+    }
 
     public MonthlySummaryDto getMonthlySummary(UUID userId, Integer month, Integer year) {
         User user = userRepository.findById(userId)
@@ -38,7 +43,8 @@ public class StatsService {
         LocalDate start = target.atDay(1);
         LocalDate end = target.atEndOfMonth();
 
-        List<Transaction> transactions = transactionRepository.findByUserAndDateBetween(user, start, end);
+        List<Transaction> transactions = transactionRepository.findByUserAndDateBetween(user, start, end)
+                .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
@@ -56,18 +62,18 @@ public class StatsService {
                 totalIncome = totalIncome.add(convertedAmount);
             } else {
                 totalExpense = totalExpense.add(convertedAmount);
-                String key = (tx.getCategory().getEmoji() != null ? tx.getCategory().getEmoji() + " " : "") + tx.getCategory().getName();
+                String key = (tx.getCategory().getEmoji() != null ? tx.getCategory().getEmoji() + " " : "")
+                        + tx.getCategory().getName();
                 expensesByCategory.merge(key, convertedAmount, BigDecimal::add);
             }
         }
 
-        // presupuesto del mes
         Optional<Budget> optionalBudget =
                 budgetRepository.findByUserAndMonthAndYear(user, target.getMonthValue(), target.getYear());
         BigDecimal monthlyBudget = optionalBudget.map(Budget::getMaxSpending).orElse(null);
         BigDecimal percentUsed = (monthlyBudget != null && monthlyBudget.compareTo(BigDecimal.ZERO) > 0)
                 ? totalExpense.multiply(BigDecimal.valueOf(100))
-                .divide(monthlyBudget, 2, BigDecimal.ROUND_HALF_UP)
+                .divide(monthlyBudget, 2, RoundingMode.HALF_UP)
                 : null;
 
         return MonthlySummaryDto.builder()
@@ -77,10 +83,9 @@ public class StatsService {
                 .monthlyBudget(monthlyBudget)
                 .budgetUsedPercent(percentUsed)
                 .expensesByCategory(expensesByCategory)
-                .convertedCurrency(preferredCurrency) // <-- nuevo campo
+                .convertedCurrency(preferredCurrency)
                 .build();
     }
-
 
     public List<MonthlyEvolutionEntryDto> getMonthlyEvolution(UUID userId, int monthsBack) {
         User user = userRepository.findById(userId)
@@ -90,7 +95,8 @@ public class StatsService {
         LocalDate now = LocalDate.now();
         LocalDate startDate = now.minusMonths(monthsBack - 1).withDayOfMonth(1);
 
-        List<Transaction> transactions = transactionRepository.findByUserAndDateAfter(user, startDate);
+        List<Transaction> transactions = transactionRepository.findByUserAndDateAfter(user, startDate)
+                .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
         Map<YearMonth, List<Transaction>> grouped = transactions.stream()
                 .collect(Collectors.groupingBy(tx -> YearMonth.from(tx.getDate())));
@@ -130,7 +136,6 @@ public class StatsService {
         return result;
     }
 
-
     public IncomeVsExpenseDto getIncomeVsExpense(UUID userId, int month, int year) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         String preferredCurrency = user.getPreferredCurrency();
@@ -138,7 +143,8 @@ public class StatsService {
         LocalDate start = LocalDate.of(year, month, 1);
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-        List<Transaction> transactions = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end);
+        List<Transaction> transactions = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end)
+                .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
         Map<String, BigDecimal> incomeByCategory = new HashMap<>();
         Map<String, BigDecimal> expenseByCategory = new HashMap<>();
@@ -172,7 +178,6 @@ public class StatsService {
                 .build();
     }
 
-
     public List<MonthlyComparisonDto> getMonthlyComparison(UUID userId, int monthsBack) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -188,7 +193,8 @@ public class StatsService {
             LocalDate start = LocalDate.of(year, month, 1);
             LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
 
-            List<Transaction> transactions = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end);
+            List<Transaction> transactions = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end)
+                    .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
             BigDecimal totalIncome = BigDecimal.ZERO;
             BigDecimal totalExpense = BigDecimal.ZERO;
@@ -228,7 +234,6 @@ public class StatsService {
         return results;
     }
 
-
     public List<TripSpendingDto> getTripSpending(UUID userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -238,7 +243,8 @@ public class StatsService {
         List<TripSpendingDto> result = new ArrayList<>();
 
         for (Trip trip : trips) {
-            List<Transaction> txs = transactionRepository.findByTrip_TripId(trip.getTripId());
+            List<Transaction> txs = transactionRepository.findByTrip_TripId(trip.getTripId())
+                    .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
             BigDecimal total = BigDecimal.ZERO;
             Map<String, BigDecimal> byCategory = new HashMap<>();
@@ -263,17 +269,15 @@ public class StatsService {
                     .name(trip.getName())
                     .startDate(trip.getStartDate())
                     .endDate(trip.getEndDate())
-                    .currency(preferredCurrency) // <- ya normalizado
+                    .currency(preferredCurrency)
                     .totalSpent(total)
                     .expenseByCategory(byCategory)
                     .build());
         }
 
-        // Ordenar por gasto total descendente
         result.sort((a, b) -> b.getTotalSpent().compareTo(a.getTotalSpent()));
         return result;
     }
-
 
     public AnnualSummaryDto getAnnualSummary(UUID userId, int year) {
         LocalDate start = LocalDate.of(year, 1, 1);
@@ -281,7 +285,8 @@ public class StatsService {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
         String preferredCurrency = user.getPreferredCurrency();
 
-        List<Transaction> txs = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end);
+        List<Transaction> txs = transactionRepository.findByUserUserIdAndDateBetween(userId, start, end)
+                .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
         BigDecimal totalIncome = BigDecimal.ZERO;
         BigDecimal totalExpense = BigDecimal.ZERO;
@@ -292,7 +297,6 @@ public class StatsService {
             BigDecimal originalAmount = tx.getAmount();
             String txCurrency = tx.getCurrency();
 
-            // Convert if needed
             BigDecimal convertedAmount = txCurrency.equals(preferredCurrency)
                     ? originalAmount
                     : exchangeRateService.convert(originalAmount, txCurrency, preferredCurrency);
@@ -319,13 +323,13 @@ public class StatsService {
                 .build();
     }
 
-
     public List<TripSpendingDto> getTripSpendingByUser(UUID userId) {
         List<Trip> trips = tripRepository.findByUserUserId(userId);
 
         return trips.stream().map(trip -> {
-            List<Transaction> expenses = transactionRepository.findByUserIdAndTrip_TripIdAndType(
-                    userId, trip.getTripId(), TransactionType.EXPENSE);
+            List<Transaction> expenses = transactionRepository
+                    .findByUserIdAndTrip_TripIdAndType(userId, trip.getTripId(), TransactionType.EXPENSE)
+                    .stream().filter(tx -> !isRecurringTemplate(tx)).toList();
 
             BigDecimal totalSpent = expenses.stream()
                     .map(Transaction::getAmount)
@@ -348,5 +352,4 @@ public class StatsService {
                     .build();
         }).collect(Collectors.toList());
     }
-
 }

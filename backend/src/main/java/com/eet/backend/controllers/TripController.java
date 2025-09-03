@@ -13,11 +13,10 @@ import com.eet.backend.services.TripService;
 import com.eet.backend.services.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.security.access.prepost.PreAuthorize;
-
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -34,19 +33,21 @@ public class TripController {
     private final TagService tagService;
     private final ExchangeRateService exchangeRateService;
 
-
-    // 🔹 Obtener todos los viajes de un usuario (convertidos a DTO)
     @GetMapping("/user/{userId}")
     @PreAuthorize("@authz.isSelf(#userId)")
     public ResponseEntity<List<TripDto>> getByUserId(@PathVariable UUID userId) {
         List<Trip> trips = tripService.getByUserId(userId);
-        List<TripDto> tripDtos = trips.stream()
-                .map(this::toDto)
-                .toList();
+        List<TripDto> tripDtos = trips.stream().map(this::toDto).toList();
         return ResponseEntity.ok(tripDtos);
     }
 
-    // 🔹 Obtener un viaje por ID
+    @GetMapping("/me")
+    public ResponseEntity<List<TripDto>> myTrips(@AuthenticationPrincipal UserDetails ud) {
+        var userId = userService.getByEmail(ud.getUsername()).orElseThrow().getUserId();
+        var trips = tripService.getByUserId(userId);
+        return ResponseEntity.ok(trips.stream().map(this::toDto).toList());
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TripDto> getById(@PathVariable UUID id) {
         return tripService.getById(id)
@@ -54,7 +55,6 @@ public class TripController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // 🔹 Crear nuevo viaje con tags y usuario
     @PostMapping
     public ResponseEntity<TripDto> create(
             @RequestBody TripRequestDto dto,
@@ -72,17 +72,12 @@ public class TripController {
         return ResponseEntity.ok(toDto(saved));
     }
 
-
-    // 🔹 Eliminar un viaje por ID
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         tripService.delete(id);
         return ResponseEntity.noContent().build();
     }
 
-
-
-    // ...
     @GetMapping("/{id}/transactions")
     public ResponseEntity<List<TransactionDto>> getTripTransactions(
             @PathVariable UUID id,
@@ -91,10 +86,10 @@ public class TripController {
         User user = userService.getByEmail(userDetails.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        return tripService.getById(id)
+        return tripService.getByIdWithTransactions(id)
                 .map(trip -> {
                     List<TransactionDto> txs = trip.getTransactions().stream()
-                            .map(tx -> toTransactionDto(tx, user)) // ✅
+                            .map(tx -> toTransactionDto(tx, user))
                             .toList();
                     return ResponseEntity.ok(txs);
                 })
@@ -121,9 +116,6 @@ public class TripController {
                 .build();
     }
 
-
-
-    // 🔁 Método auxiliar: convertir de entidad a DTO
     private TripDto toDto(Trip trip) {
         return TripDto.builder()
                 .tripId(trip.getTripId())
@@ -134,15 +126,10 @@ public class TripController {
                 .estimatedBudget(trip.getEstimatedBudget())
                 .notes(trip.getNotes())
                 .currency(trip.getCurrency())
-                .tags(
-                        trip.getTags() != null
-                                ? trip.getTags().stream().map(tag -> tag.getName()).toList()
-                                : List.of()
-                )
+                .tags(trip.getTags() != null ? trip.getTags().stream().map(Tag::getName).toList() : List.of())
                 .build();
     }
 
-    // 🔁 Método auxiliar: convertir de DTO a entidad
     private Trip toEntity(TripRequestDto dto, User user) {
         return Trip.builder()
                 .name(dto.getName())
@@ -151,15 +138,11 @@ public class TripController {
                 .endDate(dto.getEndDate())
                 .estimatedBudget(dto.getEstimatedBudget())
                 .notes(dto.getNotes())
-                .currency(dto.getCurrency()) // ← si ya lo añadiste
+                .currency(dto.getCurrency())
                 .user(user)
-                .tags(
-                        dto.getTags() != null
-                                ? dto.getTags().stream()
-                                .map(tagName -> tagService.findOrCreate(tagName, user))
-                                .toList()
-                                : List.of()
-                )
+                .tags(dto.getTags() != null
+                        ? dto.getTags().stream().map(tagName -> tagService.findOrCreate(tagName, user)).toList()
+                        : List.of())
                 .build();
     }
 
@@ -176,14 +159,6 @@ public class TripController {
         Trip existing = tripService.getById(id)
                 .orElseThrow(() -> new RuntimeException("Trip not found"));
 
-        System.out.println("Trip owner: " + existing.getUser().getUserId());
-        System.out.println("Requesting user: " + userId);
-        System.out.println("JWT userId: " + userId);
-        System.out.println("Trip owner userId: " + existing.getUser().getUserId());
-        System.out.println("User equals: " + userId.equals(existing.getUser().getUserId()));
-        System.out.println("UserDetails username: " + userDetails.getUsername());
-
-
         existing.setName(dto.getName());
         existing.setDestination(dto.getDestination());
         existing.setStartDate(dto.getStartDate());
@@ -197,7 +172,6 @@ public class TripController {
 
         if (dto.getTags() != null) {
             List<Tag> resolved = tagService.findOrCreateAll(dto.getTags(), user);
-
             if (existing.getTags() == null) {
                 existing.setTags(new ArrayList<>(resolved));
             } else {
@@ -205,12 +179,8 @@ public class TripController {
                 existing.getTags().addAll(resolved);
             }
         }
-// si dto.getTags() == null -> no tocar los tags existentes
-
 
         Trip updated = tripService.save(existing);
         return ResponseEntity.ok(toDto(updated));
     }
-
-
 }

@@ -4,9 +4,20 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import toast from 'react-hot-toast';
 import { useTranslation } from "react-i18next";
+import { getUserInfo } from "../services/userService";
 
 export default function Login() {
-  const { t } = useTranslation("auth");
+  const normalizeLang = (lng) => {
+  const m = String(lng || "").toLowerCase();
+  if (m.startsWith("es")) return "es";
+  if (m.startsWith("en")) return "en";
+  if (m.startsWith("fr")) return "fr";
+  if (m.startsWith("pl")) return "pl";
+  if (m.startsWith("ca") || m.startsWith("val") || m === "vl") return "vl";
+  return "en";
+};
+
+const { t, i18n } = useTranslation("auth");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -40,6 +51,14 @@ export default function Login() {
     try {
       const data = await loginService({ email, password });
       login(data.token);
+      try {
+        const me = await getUserInfo();
+        const lang = normalizeLang(me?.language);
+        i18n.changeLanguage(lang);
+        localStorage.setItem("i18nextLng", lang);
+      } catch (e) {
+        console.error("No se pudo ajustar el idioma por usuario", e);
+      }
       navigate("/dashboard");
     } catch (err) {
       toast.error(t("invalidCredentials"));
@@ -97,6 +116,17 @@ export default function Login() {
           {t("register")}
         </a>
       </p>
+
+      {/* Texto LOPD más abajo */}
+      <div className="mt-20 text-sm text-gray-700">
+        {t("lopdNotice")}{" "}
+        <a
+          href="mailto:amelgar1@etsinf.upv.es "
+          className="text-[#0056B3] underline"
+        >
+         amelgar1@etsinf.upv.es 
+                  </a>
+      </div>
     </div>
   );
 }

@@ -20,15 +20,18 @@ import java.util.UUID;
 public class TripService {
 
     private final TripRepository tripRepository;
-
     private final TagService tagService;
 
     public List<Trip> getByUserId(UUID userId) {
-        return tripRepository.findByUserUserId(userId);
+        return tripRepository.findByUserUserId(userId); // tags precargados
     }
 
     public Optional<Trip> getById(UUID id) {
-        return tripRepository.findById(id);
+        return tripRepository.findById(id); // tags precargados
+    }
+
+    public Optional<Trip> getByIdWithTransactions(UUID id) {
+        return tripRepository.findWithTransactions(id); // tx + category precargados
     }
 
     public Trip save(Trip trip) {
@@ -48,14 +51,8 @@ public class TripService {
                 .endDate(trip.getEndDate())
                 .estimatedBudget(trip.getEstimatedBudget())
                 .notes(trip.getNotes())
-                .tags(
-                        trip.getTags() != null
-                                ? trip.getTags().stream()
-                                .map(tag -> tag.getName())
-                                .toList()
-                                : List.of()
-                )
                 .currency(trip.getCurrency())
+                .tags(trip.getTags() != null ? trip.getTags().stream().map(Tag::getName).toList() : List.of())
                 .build();
     }
 
@@ -71,7 +68,7 @@ public class TripService {
                 .endDate(dto.getEndDate())
                 .estimatedBudget(dto.getEstimatedBudget())
                 .notes(dto.getNotes())
-                .currency(dto.getCurrency()) // si lo has añadido
+                .currency(dto.getCurrency())
                 .user(user)
                 .tags(tagEntities)
                 .build();

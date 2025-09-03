@@ -22,43 +22,35 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private final CustomUserDetailsService userDetailsService;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+            throws ServletException, IOException {
 
-        // Si es una ruta pública, continuar sin procesar JWT
-        if (request.getServletPath().startsWith("/auth/")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        String path   = request.getRequestURI();
+        String authH  = request.getHeader("Authorization");
+        boolean hasB  = authH != null && authH.startsWith("Bearer ");
+        System.out.println("[JWT] path=" + path + " hasAuth=" + (authH != null) + " bearer=" + hasB);
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("[JWT FILTER] No Authorization header present or not Bearer");
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (path.startsWith("/auth/")) { chain.doFilter(request, response); return; }
+        if (!hasB) { System.out.println("[JWT] skip (no header)"); chain.doFilter(request, response); return; }
 
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
-        System.out.println("[JWT FILTER] Extracted email: " + userEmail);
+        String jwt = authH.substring(7);
+        String email = null;
+        try { email = jwtService.extractUsername(jwt); } catch (Exception e) { System.out.println("[JWT] extract err: " + e.getMessage()); }
+        System.out.println("[JWT] email=" + email);
 
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-                System.out.println("[JWT FILTER] Token valid. Authentication set.");
-            } else {
-                System.out.println("[JWT FILTER] Invalid JWT token.");
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            var userDetails = userDetailsService.loadUserByUsername(email);
+            boolean ok = jwtService.isTokenValid(jwt, userDetails);
+            System.out.println("[JWT] valid=" + ok);
+            if (ok) {
+                var auth = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println("[JWT] AUTH SET email=" + email);
             }
         }
-
-        filterChain.doFilter(request, response);
+        chain.doFilter(request, response);
     }
+
+
 }

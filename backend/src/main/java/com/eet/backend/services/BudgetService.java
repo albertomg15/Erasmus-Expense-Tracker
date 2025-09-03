@@ -3,6 +3,9 @@ package com.eet.backend.services;
 import com.eet.backend.dto.BudgetDto;
 import com.eet.backend.dto.BudgetWithSpentDto;
 import com.eet.backend.model.Budget;
+import com.eet.backend.model.RecurringTransaction;
+import com.eet.backend.model.Transaction;
+import com.eet.backend.model.TransactionType;
 import com.eet.backend.model.User;
 import com.eet.backend.repositories.BudgetRepository;
 import com.eet.backend.repositories.TransactionRepository;
@@ -11,6 +14,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -21,8 +26,11 @@ import java.util.UUID;
 public class BudgetService {
 
     private final BudgetRepository budgetRepository;
-
     private final TransactionRepository transactionRepository;
+
+    private static boolean isRecurringTemplate(Transaction tx) {
+        return tx instanceof RecurringTransaction;
+    }
 
     public List<Budget> getByUserId(UUID userId) {
         return budgetRepository.findByUserUserId(userId);
@@ -53,7 +61,7 @@ public class BudgetService {
                 })
                 .orElseGet(() -> {
                     Budget newBudget = Budget.builder()
-                            .user(User.builder().userId(userId).build()) // usar solo ID para evitar ciclo
+                            .user(User.builder().userId(userId).build())
                             .maxSpending(maxSpending)
                             .warningThreshold(warningThreshold)
                             .build();
@@ -68,23 +76,28 @@ public class BudgetService {
     public List<BudgetWithSpentDto> getBudgetsWithSpent(UUID userId) {
         List<Budget> budgets = budgetRepository.findByUserUserIdAndMonthIsNotNullAndYearIsNotNull(userId);
 
-        return budgets.stream()
-                .map(b -> {
-                    BigDecimal spent = transactionRepository.getTotalSpentByUserAndMonthAndYear(
-                            userId, b.getMonth(), b.getYear()
-                    ).orElse(BigDecimal.ZERO);
+        return budgets.stream().map(b -> {
+            YearMonth ym = YearMonth.of(b.getYear(), b.getMonth());
+            LocalDate start = ym.atDay(1);
+            LocalDate end = ym.atEndOfMonth();
 
-                    return BudgetWithSpentDto.builder()
-                            .budgetId(b.getBudgetId())
-                            .month(b.getMonth())
-                            .year(b.getYear())
-                            .maxSpending(b.getMaxSpending())
-                            .warningThreshold(b.getWarningThreshold())
-                            .spent(spent)
-                            .build();
-                }).toList();
+            BigDecimal spent = transactionRepository
+                    .findByUserUserIdAndDateBetween(userId, start, end).stream()
+                    .filter(tx -> tx.getType() == TransactionType.EXPENSE)
+                    .filter(tx -> !isRecurringTemplate(tx))
+                    .map(Transaction::getAmount)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+            return BudgetWithSpentDto.builder()
+                    .budgetId(b.getBudgetId())
+                    .month(b.getMonth())
+                    .year(b.getYear())
+                    .maxSpending(b.getMaxSpending())
+                    .warningThreshold(b.getWarningThreshold())
+                    .spent(spent)
+                    .build();
+        }).toList();
     }
-
 
     public Budget saveOrUpdateMonthlyBudget(BudgetDto dto, User user) {
         Optional<Budget> existing = budgetRepository
@@ -103,5 +116,4 @@ public class BudgetService {
     public Optional<Budget> getMonthlyBudget(UUID userId, int month, int year) {
         return budgetRepository.findByUserUserIdAndMonthAndYear(userId, month, year);
     }
-
 }

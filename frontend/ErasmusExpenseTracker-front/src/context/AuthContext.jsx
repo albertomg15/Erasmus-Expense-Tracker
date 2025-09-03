@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { API_BASE_URL, getAuthHeaders } from "../services/config";
+import i18n from "../i18n";
 
 const AuthContext = createContext();
 
@@ -33,6 +34,15 @@ export const AuthProvider = ({ children }) => {
     }
   }, []);
 
+  const detectBrowserLang = () => {
+  const nav = (navigator.language || "en").toLowerCase();
+   if (nav.startsWith("es")) return "es";
+   if (nav.startsWith("fr")) return "fr";
+   if (nav.startsWith("pl")) return "pl";
+   if (nav.startsWith("ca") || nav.startsWith("val")) return "vl";
+   return "en";
+ };
+
   const login = async (jwt) => {
     sessionStorage.setItem("token", jwt);
     setToken(jwt);
@@ -44,6 +54,8 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
     setUser(null);
     setSessionExpired(true);
+    localStorage.removeItem("i18nextLng"); // no arrastrar idioma del usuario anterior
+    i18n.changeLanguage(detectBrowserLang());
   };
 
   return (
