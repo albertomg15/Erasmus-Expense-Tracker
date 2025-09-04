@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.Set;
-
+import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -56,6 +56,10 @@ public class ExchangeRateService {
                     .map(p -> p.rate(from, to, date))
                     .orElseThrow(() -> new IllegalStateException("Fuentes FX caídas: " + e.getMessage(), e));
         }
+    }
+
+    public List<ExchangeRate> getAll() {
+        return repo.findAll();
     }
 
     public Set<String> getSupportedCurrencies() {
