@@ -1,59 +1,55 @@
-import React from "react";
+import React, { useId } from "react";
 import { useTranslation } from "react-i18next";
-import { formatCurrency } from "../../utils/formatters"; // ajusta ruta si es necesario
+import { formatCurrency } from "../../utils/formatters";
 
-const BudgetRing = ({ percent, used, max, currency }) => {
+const clamp = (n, a, b) => Math.min(Math.max(n, a), b);
+
+const BudgetRing = ({ percent, used, max, currency, size = 140 }) => {
   const { t } = useTranslation("statistics");
+  const gid = useId();
 
-  const radius = 60;
-  const stroke = 12;
-  const normalizedRadius = radius - stroke / 2;
-  const circumference = 2 * Math.PI * normalizedRadius;
-  const offset = circumference - (percent / 100) * circumference;
+  const p = isFinite(percent) ? clamp(percent, 0, 100) : 0;
+  const stroke = Math.max(10, Math.round(size * 0.085));
+  const radius = size / 2;
+  const r = radius - stroke / 2;
+  const C = 2 * Math.PI * r;
+  const offset = C * (1 - p / 100);
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <svg height={radius * 2} width={radius * 2}>
-        <circle
-          stroke="#e5e7eb"
-          fill="transparent"
-          strokeWidth={stroke}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-        <circle
-          stroke="url(#gradient)"
-          fill="transparent"
-          strokeWidth={stroke}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          strokeDashoffset={offset}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-          transform={`rotate(-90 ${radius} ${radius})`}
-          style={{ transition: "stroke-dashoffset 0.6s ease" }}
-        />
+      <svg viewBox={`0 0 ${size} ${size}`} width="100%" height="auto" role="img" aria-label={t("budget.title")}>
         <defs>
-          <linearGradient id="gradient" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0%" stopColor="#10b981" />
-            <stop offset="100%" stopColor="#34d399" />
+          <linearGradient id={`grad-${gid}`} x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stopColor="#10B981" />
+            <stop offset="100%" stopColor="#34D399" />
           </linearGradient>
         </defs>
-        <text
-          x="50%"
-          y="50%"
-          textAnchor="middle"
-          dominantBaseline="central"
-          className="fill-gray-700 text-base font-semibold"
-        >
-          {percent.toFixed(0)}%
+
+        <circle cx={radius} cy={radius} r={r} fill="none" stroke="#e5e7eb" strokeWidth={stroke} />
+        <circle
+          cx={radius}
+          cy={radius}
+          r={r}
+          fill="none"
+          stroke={`url(#grad-${gid})`}
+          strokeWidth={stroke}
+          strokeLinecap="round"
+          strokeDasharray={C}
+          strokeDashoffset={offset}
+          transform={`rotate(-90 ${radius} ${radius})`}
+          style={{ transition: "stroke-dashoffset 0.6s ease" }}
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(p)}
+        />
+        <text x="50%" y="50%" textAnchor="middle" dominantBaseline="central" className="fill-gray-700 text-base font-semibold">
+          {Math.round(p)}%
         </text>
       </svg>
 
-      <p className="text-sm text-gray-600 mt-2">
-        {t("budget.used")} {formatCurrency(used, currency)} / {t("budget.total")} {formatCurrency(max, currency)}
+      <p className="text-sm text-gray-600 mt-2 text-center">
+        {t("budget.used")} {formatCurrency(used || 0, currency)} / {t("budget.total")} {formatCurrency(max || 0, currency)}
       </p>
     </div>
   );

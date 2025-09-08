@@ -1,0 +1,31 @@
+{
+  "loading": "Chargement des données...",
+  "error": "Erreur lors de la récupération des données",
+  "countryAveragesTitle": "Moyennes de dépenses par pays",
+  "countryAveragesDescription": "Ce graphique montre la dépense mensuelle moyenne par catégorie dans votre pays, basée sur des données anonymes d'utilisateurs.",
+  "countryAverage": "Moyenne du pays",
+  "userAverage": "Votre moyenne",
+  "showIncompleteUserData": "Inclure vos données même si elles sont incomplètes",
+  "title": "Comparaison des dépenses avec la moyenne du pays",
+  "user": "Vous",
+  "country": "Moyenne du pays",
+  "incompleteNotice": "Pour rendre cette comparaison utile, assurez-vous que les données du mois sont complètes.",
+  "consentRequired": "Pour afficher cette section, activez la case de consentement au traitement des données dans le profil.",
+  "selectMonth": "Sélectionner le mois",
+  "selectYear": "Sélectionner l'année",
+  "months": {
+    "1": "Janvier",
+    "2": "Février",
+    "3": "Mars",
+    "4": "Avril",
+    "5": "Mai",
+    "6": "Juin",
+    "7": "Juillet",
+    "8": "Août",
+    "9": "Septembre",
+    "10": "Octobre",
+    "11": "Novembre",
+    "12": "Décembre"
+  },
+  "currencyNote": "Toutes les valeurs sont affichées en : {{currency}}"
+}

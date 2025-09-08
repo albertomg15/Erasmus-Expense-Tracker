@@ -1,0 +1,43 @@
+{
+  "title": "Statistiques",
+  "loading": "Chargement des statistiques...",
+  "errorLoading": "Impossible de charger les statistiques.",
+  "budgetUsage": "Utilisation du budget",
+  "expensesByCategory": "Dépenses par catégorie",
+  "noCategoryData": "Aucune donnée de dépenses pour ce mois.",
+  "filters": {
+    "month": "Mois",
+    "year": "Année"
+  },
+  "tabs": {
+    "summary": "Résumé",
+    "evolution": "Revenus et dépenses dans le temps",
+    "categories": "Dépenses par catégorie",
+    "incomeVsExpense": "Revenus vs Dépenses",
+    "monthlyComparison": "Comparaison mensuelle",
+    "tripSpending": "Dépense par voyage",
+    "annualSummary": "Résumé annuel"
+  },
+  "labels": {
+    "income": "Revenus",
+    "expense": "Dépenses",
+    "savings": "Épargne",
+    "totalSpent": "Total dépensé",
+    "year": "Année"
+  },
+  "errors": {
+    "invalidChartData": "Données invalides pour le graphique du résumé annuel"
+  },
+  "stat": {
+    "income": "Revenus",
+    "expense": "Dépenses",
+    "balance": "Solde"
+  },
+  "budget": {
+    "used": "Utilisé",
+    "total": "Total"
+  },
+  "legend": {
+    "allValuesInPreferredCurrencyWithCode": "Toutes les valeurs sont affichées dans votre devise préférée ({{currency}})."
+  }
+}

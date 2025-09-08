@@ -1,0 +1,46 @@
+{
+  "editTitle": "Modifier le budget mensuel",
+  "newTitle": "Nouveau budget mensuel",
+  "month": "Mois",
+  "year": "Année",
+  "maxSpending": "Dépense maximale (€)",
+  "warningThreshold": "Seuil d'alerte (€)",
+  "tooltipMax": "Montant estimé que vous prévoyez de dépenser pendant le mois sélectionné.",
+  "tooltipWarning": "Vous recevrez une alerte lorsque vos dépenses atteindront ce montant.",
+  "save": "Enregistrer le budget",
+  "update": "Mettre à jour le budget",
+  "cancel": "Annuler",
+  "createdSuccess": "Budget créé avec succès.",
+  "updatedSuccess": "Budget mis à jour avec succès.",
+  "deletedSuccess": "Budget supprimé avec succès.",
+  "loadError": "Erreur lors du chargement du budget.",
+  "createError": "Erreur lors de la création du budget.",
+  "updateError": "Erreur lors de la mise à jour du budget.",
+  "deleteError": "Erreur lors de la suppression du budget.",
+  "validation": {
+    "required": "Le mois et l'année sont obligatoires.",
+    "invalidNumbers": "Les valeurs du budget doivent être des nombres valides.",
+    "threshold": "La dépense maximale doit être supérieure au seuil d'alerte."
+  },
+  "listTitle": "📅 Budgets mensuels",
+  "addButton": "➕ Ajouter un budget",
+  "filterYear": "Filtrer par année :",
+  "sortBy": "Trier par :",
+  "sort": {
+    "month": "Mois",
+    "maxSpending": "Dépense maximale",
+    "spent": "Dépensé"
+  },
+  "table": {
+    "month": "Mois",
+    "year": "Année",
+    "max": "Dépense maximale (€)",
+    "warning": "Seuil d'alerte (€)",
+    "actions": "Actions",
+    "progress": "Progression",
+    "edit": "✏️ Modifier",
+    "delete": "🗑️ Supprimer",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce budget ?"
+  },
+  "allYears": "Toutes les années"
+}

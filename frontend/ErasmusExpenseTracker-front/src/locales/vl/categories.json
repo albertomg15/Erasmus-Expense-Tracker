@@ -1,0 +1,15 @@
+{
+  "label": "Categoria",
+  "select": "Selecciona una categoria",
+  "new": "+ Nova categoria",
+  "editCategory": "Editar categoria",
+  "newCategory": "Nova categoria",
+  "chooseEmoji": "Tria un emoji",
+  "cancel": "Cancel·lar",
+  "save": "Guardar",
+  "created": "Categoria creada",
+  "updated": "Categoria actualitzada",
+  "error": "Error en guardar la categoria",
+  "deleted": "Categoria eliminada",
+  "cannotDelete": "No es pot eliminar: aquesta categoria està en ús per transaccions existents."
+}

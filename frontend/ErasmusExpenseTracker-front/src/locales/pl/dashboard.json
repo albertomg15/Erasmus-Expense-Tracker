@@ -1,0 +1,14 @@
+{
+  "title": "Panel główny",
+  "loading": "Ładowanie panelu...",
+  "currentBalance": "Bieżące saldo",
+  "spentThisMonth": "Wydano w tym miesiącu",
+  "monthlyLimit": "Limit miesięczny",
+  "leftThisMonth": "pozostało w tym miesiącu",
+  "setBudget": "Ustaw miesięczny budżet",
+  "latestTransactions": "Ostatnie transakcje",
+  "addTransaction": "Dodaj transakcję",
+  "noTransactions": "Brak transakcji w tym miesiącu.",
+  "viewAll": "Zobacz wszystkie transakcje",
+  "uncategorized": "Bez kategorii"
+}

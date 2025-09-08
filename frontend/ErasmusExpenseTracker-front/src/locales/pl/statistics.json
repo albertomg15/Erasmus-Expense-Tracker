@@ -1,0 +1,43 @@
+{
+  "title": "Statystyki",
+  "loading": "Ładowanie statystyk...",
+  "errorLoading": "Nie udało się wczytać statystyk.",
+  "budgetUsage": "Wykorzystanie budżetu",
+  "expensesByCategory": "Wydatki według kategorii",
+  "noCategoryData": "Brak danych o wydatkach w tym miesiącu.",
+  "filters": {
+    "month": "Miesiąc",
+    "year": "Rok"
+  },
+  "tabs": {
+    "summary": "Podsumowanie",
+    "evolution": "Przychody i wydatki w czasie",
+    "categories": "Wydatki według kategorii",
+    "incomeVsExpense": "Przychody vs Wydatki",
+    "monthlyComparison": "Porównanie miesięczne",
+    "tripSpending": "Wydatki według podróży",
+    "annualSummary": "Podsumowanie roczne"
+  },
+  "labels": {
+    "income": "Przychody",
+    "expense": "Wydatki",
+    "savings": "Oszczędności",
+    "totalSpent": "Suma wydatków",
+    "year": "Rok"
+  },
+  "errors": {
+    "invalidChartData": "Nieprawidłowe dane do wykresu podsumowania rocznego"
+  },
+  "stat": {
+    "income": "Przychody",
+    "expense": "Wydatki",
+    "balance": "Saldo"
+  },
+  "budget": {
+    "used": "Wykorzystano",
+    "total": "Razem"
+  },
+  "legend": {
+    "allValuesInPreferredCurrencyWithCode": "Wszystkie wartości są wyświetlane w Twojej preferowanej walucie ({{currency}})."
+  }
+}

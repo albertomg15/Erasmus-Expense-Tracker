@@ -1,0 +1,46 @@
+{
+  "editTitle": "Edytuj budżet miesięczny",
+  "newTitle": "Nowy budżet miesięczny",
+  "month": "Miesiąc",
+  "year": "Rok",
+  "maxSpending": "Maksymalne wydatki (€)",
+  "warningThreshold": "Próg ostrzeżenia (€)",
+  "tooltipMax": "Szacowana kwota, którą planujesz wydać w wybranym miesiącu.",
+  "tooltipWarning": "Otrzymasz alert, gdy Twoje wydatki osiągną tę kwotę.",
+  "save": "Zapisz budżet",
+  "update": "Zaktualizuj budżet",
+  "cancel": "Anuluj",
+  "createdSuccess": "Budżet utworzono pomyślnie.",
+  "updatedSuccess": "Budżet zaktualizowano pomyślnie.",
+  "deletedSuccess": "Budżet usunięto pomyślnie.",
+  "loadError": "Błąd wczytywania budżetu.",
+  "createError": "Błąd podczas tworzenia budżetu.",
+  "updateError": "Błąd podczas aktualizacji budżetu.",
+  "deleteError": "Błąd podczas usuwania budżetu.",
+  "validation": {
+    "required": "Miesiąc i rok są obowiązkowe.",
+    "invalidNumbers": "Wartości budżetu muszą być prawidłowymi liczbami.",
+    "threshold": "Maksymalne wydatki muszą być większe niż próg ostrzeżenia."
+  },
+  "listTitle": "📅 Budżety miesięczne",
+  "addButton": "➕ Dodaj budżet",
+  "filterYear": "Filtruj według roku:",
+  "sortBy": "Sortuj według:",
+  "sort": {
+    "month": "Miesiąc",
+    "maxSpending": "Maksymalne wydatki",
+    "spent": "Wydano"
+  },
+  "table": {
+    "month": "Miesiąc",
+    "year": "Rok",
+    "max": "Maksymalne wydatki (€)",
+    "warning": "Próg ostrzeżenia (€)",
+    "actions": "Działania",
+    "progress": "Postęp",
+    "edit": "✏️ Edytuj",
+    "delete": "🗑️ Usuń",
+    "confirmDelete": "Czy na pewno chcesz usunąć ten budżet?"
+  },
+  "allYears": "Wszystkie lata"
+}

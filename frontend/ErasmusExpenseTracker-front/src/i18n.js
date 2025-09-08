@@ -87,7 +87,8 @@ i18n
     },
     supportedLngs: ["en", "es", "fr", "pl", "vl"],
     // Si el navegador es 'ca' usa 'vl'
-    fallbackLng: { ca: ["vl", "en"], default: ["en"] },
+    fallbackLng: (code) =>
+   code && code.toLowerCase().startsWith("ca") ? ["vl", "en"] : ["en"],
     defaultNS: "common",
     ns: ["budget", "profile", "transactions", "statistics", "auth", "categories", "common", "dashboard", "trips", "comparison"],
     interpolation: { escapeValue: false },

@@ -1,0 +1,27 @@
+{
+  "appName": "Erasmus Expense Tracker",
+  "confirmLogout": "Czy na pewno chcesz się wylogować?",
+  "nav": {
+    "home": "Strona główna",
+    "trips": "Podróże",
+    "transactions": "Transakcje",
+    "statistics": "Statystyki",
+    "budgets": "Budżety",
+    "profile": "Edytuj profil",
+    "logout": "Wyloguj się",
+    "comparison": "Porównanie"
+  },
+  "tags": {
+    "label": "Etykiety",
+    "placeholder": "Wybierz etykiety",
+    "new": "Nowa etykieta",
+    "edit": "Edytuj etykietę",
+    "cancel": "Anuluj",
+    "save": "Zapisz",
+    "created": "Etykieta utworzona",
+    "updated": "Etykieta zaktualizowana",
+    "deleted": "Etykieta usunięta",
+    "saveError": "Błąd podczas zapisywania etykiety",
+    "deleteError": "Nie można usunąć etykiety (może być używana)"
+  }
+}

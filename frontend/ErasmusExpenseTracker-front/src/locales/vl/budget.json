@@ -1,0 +1,46 @@
+{
+  "editTitle": "Editar pressupost mensual",
+  "newTitle": "Nou pressupost mensual",
+  "month": "Mes",
+  "year": "Any",
+  "maxSpending": "Despesa màxima (€)",
+  "warningThreshold": "Llindar d'avís (€)",
+  "tooltipMax": "Import estimat que penses gastar durant el mes seleccionat.",
+  "tooltipWarning": "Rebràs una alerta quan les teues despeses arriben a aquesta quantitat.",
+  "save": "Guardar pressupost",
+  "update": "Actualitzar pressupost",
+  "cancel": "Cancel·lar",
+  "createdSuccess": "Pressupost creat correctament.",
+  "updatedSuccess": "Pressupost actualitzat correctament.",
+  "deletedSuccess": "Pressupost eliminat correctament.",
+  "loadError": "Error en carregar el pressupost.",
+  "createError": "Error en crear el pressupost.",
+  "updateError": "Error en actualitzar el pressupost.",
+  "deleteError": "Error en eliminar el pressupost.",
+  "validation": {
+    "required": "Mes i any són obligatoris.",
+    "invalidNumbers": "Els valors del pressupost han de ser nombres vàlids.",
+    "threshold": "La despesa màxima ha de ser major que el llindar d'avís."
+  },
+  "listTitle": "📅 Pressupostos mensuals",
+  "addButton": "➕ Afig pressupost",
+  "filterYear": "Filtrar per any:",
+  "sortBy": "Ordena per:",
+  "sort": {
+    "month": "Mes",
+    "maxSpending": "Despesa màxima",
+    "spent": "Gastat"
+  },
+  "table": {
+    "month": "Mes",
+    "year": "Any",
+    "max": "Despesa màxima (€)",
+    "warning": "Llindar d'avís (€)",
+    "actions": "Accions",
+    "progress": "Progrés",
+    "edit": "✏️ Editar",
+    "delete": "🗑️ Eliminar",
+    "confirmDelete": "Estàs segur que vols eliminar aquest pressupost?"
+  },
+  "allYears": "Tots els anys"
+}

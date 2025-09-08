@@ -1,0 +1,27 @@
+{
+  "appName": "Erasmus Expense Tracker",
+  "confirmLogout": "Êtes-vous sûr de vouloir vous déconnecter ?",
+  "nav": {
+    "home": "Accueil",
+    "trips": "Voyages",
+    "transactions": "Transactions",
+    "statistics": "Statistiques",
+    "budgets": "Budgets",
+    "profile": "Modifier le profil",
+    "logout": "Se déconnecter",
+    "comparison": "Comparaison"
+  },
+  "tags": {
+    "label": "Étiquettes",
+    "placeholder": "Sélectionnez des étiquettes",
+    "new": "Nouvelle étiquette",
+    "edit": "Modifier l'étiquette",
+    "cancel": "Annuler",
+    "save": "Enregistrer",
+    "created": "Étiquette créée",
+    "updated": "Étiquette mise à jour",
+    "deleted": "Étiquette supprimée",
+    "saveError": "Erreur lors de l'enregistrement de l'étiquette",
+    "deleteError": "Impossible de supprimer l'étiquette (elle est peut-être utilisée)"
+  }
+}

@@ -10,7 +10,7 @@ import {
   Legend,
 } from "recharts";
 import { useTranslation } from "react-i18next";
-import { formatCurrency } from "../../utils/formatters"; // ajusta ruta si hace falta
+import { formatCurrency } from "../../utils/formatters";
 
 const AnnualSummaryChart = ({ data }) => {
   const { t } = useTranslation("statistics");
@@ -21,33 +21,32 @@ const AnnualSummaryChart = ({ data }) => {
   }
 
   const currency = data.convertedCurrency || "EUR";
-
   const chartData = [
     {
-      month: `${t("labels.year")} ${data.year}`,
-      income: parseFloat(data.totalIncome),
-      expense: parseFloat(data.totalExpense),
-      savings: parseFloat(data.totalSaving),
+      label: `${t("labels.year")} ${data.year}`,
+      income: Number(data.totalIncome) || 0,
+      expense: Number(data.totalExpense) || 0,
+      savings: Number(data.totalSaving) || 0,
     },
   ];
 
   return (
-    <div className="bg-white shadow rounded-2xl p-4">
-      <h3 className="text-lg font-semibold mb-2">
-        {t("tabs.annualSummary")}
-      </h3>
-      <ResponsiveContainer width="100%" height={300}>
-        <AreaChart data={chartData}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="month" />
-          <YAxis />
-          <Tooltip formatter={(value) => formatCurrency(value, currency)} />
-          <Legend />
-          <Area type="monotone" dataKey="income" stackId="1" stroke="#10B981" fill="#D1FAE5" name={t("labels.income")} />
-          <Area type="monotone" dataKey="expense" stackId="1" stroke="#EF4444" fill="#FECACA" name={t("labels.expense")} />
-          <Area type="monotone" dataKey="savings" stroke="#3B82F6" fill="#DBEAFE" name={t("labels.savings")} />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div className="bg-white rounded-2xl shadow p-4">
+      <h3 className="text-lg font-semibold mb-2">{t("tabs.annualSummary")}</h3>
+      <div className="w-full aspect-[4/3] md:aspect-[16/9]">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis dataKey="label" />
+            <YAxis tickFormatter={(v) => formatCurrency(v, currency)} />
+            <Tooltip formatter={(v) => formatCurrency(Number(v) || 0, currency)} />
+            <Legend />
+            <Area type="monotone" dataKey="income" stackId="sum" stroke="#10B981" fill="#D1FAE5" name={t("labels.income")} />
+            <Area type="monotone" dataKey="expense" stackId="sum" stroke="#EF4444" fill="#FECACA" name={t("labels.expense")} />
+            <Area type="monotone" dataKey="savings" stroke="#3B82F6" fill="#DBEAFE" name={t("labels.savings")} />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
     </div>
   );
 };

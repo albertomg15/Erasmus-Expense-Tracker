@@ -1,0 +1,14 @@
+{
+  "title": "Tableau de bord",
+  "loading": "Chargement du tableau de bord...",
+  "currentBalance": "Solde actuel",
+  "spentThisMonth": "Dépensé ce mois-ci",
+  "monthlyLimit": "Plafond mensuel",
+  "leftThisMonth": "restants ce mois-ci",
+  "setBudget": "Définir le budget mensuel",
+  "latestTransactions": "Dernières transactions",
+  "addTransaction": "Ajouter une transaction",
+  "noTransactions": "Aucune transaction trouvée ce mois-ci.",
+  "viewAll": "Voir toutes les transactions",
+  "uncategorized": "Sans catégorie"
+}

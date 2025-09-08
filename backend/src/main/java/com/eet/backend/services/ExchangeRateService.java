@@ -35,18 +35,23 @@ public class ExchangeRateService {
     public Optional<ExchangeRate> getRate(String from, String to) { return getRate(from, to, LocalDate.now()); }
 
     public Optional<ExchangeRate> getRate(String from, String to, LocalDate date) {
-        String f = from.toUpperCase(Locale.ROOT), t = to.toUpperCase(Locale.ROOT);
-        LocalDate d = (date == null) ? LocalDate.now() : date;
+        String f = from.toUpperCase(), t = to.toUpperCase();
+        LocalDate d = (date==null)? LocalDate.now() : date;
 
-        // 1) DB
-        var hit = repo.findByFromCurrencyAndToCurrencyAndDate(f, t, d);
-        if (hit.isPresent()) return hit;
+        if (f.equals(t)) {
+            return Optional.of(ExchangeRate.builder()
+                    .fromCurrency(f).toCurrency(t)
+                    .rate(BigDecimal.ONE)
+                    .date(d).build());
+        }
 
-        // 2) Proveedores
-        BigDecimal rate = fetchWithFallback(f, t, d);
-        ExchangeRate saved = repo.save(ExchangeRate.builder()
-                .fromCurrency(f).toCurrency(t).rate(rate).date(d).build());
-        return Optional.of(saved);
+        return repo.findByFromCurrencyAndToCurrencyAndDate(f,t,d)
+                .or(() -> {
+                    BigDecimal r = fetchWithFallback(f,t,d);
+                    ExchangeRate saved = repo.save(ExchangeRate.builder()
+                            .fromCurrency(f).toCurrency(t).rate(r).date(d).build());
+                    return Optional.of(saved);
+                });
     }
 
     private BigDecimal fetchWithFallback(String from, String to, LocalDate date) {

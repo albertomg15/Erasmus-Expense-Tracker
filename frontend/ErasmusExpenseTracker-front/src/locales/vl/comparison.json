@@ -1,0 +1,31 @@
+{
+  "loading": "Carregant dades...",
+  "error": "Error en obtindre les dades",
+  "countryAveragesTitle": "Promigs de despesa per país",
+  "countryAveragesDescription": "Aquest gràfic mostra la despesa mensual mitjana per categoria al teu país, basada en dades anònimes d'usuaris.",
+  "countryAverage": "Mitjana del país",
+  "userAverage": "La teua mitjana",
+  "showIncompleteUserData": "Inclou les teues dades encara que estiguen incompletes",
+  "title": "Comparativa de despeses amb la mitjana del país",
+  "user": "Tu",
+  "country": "Mitjana del país",
+  "incompleteNotice": "Per a fer útil aquesta comparativa, assegura't que les dades del mes estiguen completes.",
+  "consentRequired": "Per a veure aquesta secció, habilita la casella de consentiment de processament de dades en el perfil.",
+  "selectMonth": "Selecciona mes",
+  "selectYear": "Selecciona any",
+  "months": {
+    "1": "Gener",
+    "2": "Febrer",
+    "3": "Març",
+    "4": "Abril",
+    "5": "Maig",
+    "6": "Juny",
+    "7": "Juliol",
+    "8": "Agost",
+    "9": "Setembre",
+    "10": "Octubre",
+    "11": "Novembre",
+    "12": "Desembre"
+  },
+  "currencyNote": "Totes les quantitats es mostren en: {{currency}}"
+}

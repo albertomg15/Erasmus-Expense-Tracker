@@ -10,17 +10,11 @@ export default function TransactionList({ transactions, onDelete }) {
 
   const handleDelete = async () => {
     const tx = selectedTransaction;
-    const confirmed = window.confirm(
-      t("confirmDelete", { defaultValue: "Are you sure you want to delete this transaction?" })
-    );
-    if (!confirmed) return;
+    if (!window.confirm(t("confirmDelete", { defaultValue: "Are you sure you want to delete this transaction?" }))) return;
     try {
       const isRecurring = tx?.isRecurring ?? !!tx?.recurrencePattern;
-      if (isRecurring) {
-        await deleteRecurringTransaction(tx.transactionId);
-      } else {
-        await deleteTransaction(tx.transactionId);
-      }
+      if (isRecurring) await deleteRecurringTransaction(tx.transactionId);
+      else await deleteTransaction(tx.transactionId);
       onDelete?.(tx.transactionId);
       setSelectedTransaction(null);
     } catch (err) {
@@ -31,7 +25,8 @@ export default function TransactionList({ transactions, onDelete }) {
 
   return (
     <>
-      <ul className="divide-y">
+      {/* móvil: tarjetas; desktop: lista dividida */}
+      <ul className="grid gap-2 md:gap-0 md:block md:divide-y">
         {transactions.map((tx) => {
           const isIncome = tx.type === "INCOME";
           const isRecurring = tx.isRecurring ?? !!tx.recurrencePattern;
@@ -42,8 +37,6 @@ export default function TransactionList({ transactions, onDelete }) {
             : tx.categoryName || tx.category?.name || t("uncategorized", { defaultValue: "Uncategorized" });
 
           const dateFormatted = new Date(tx.date).toLocaleDateString();
-
-          // Importe principal (gris si recurrente; tachado si inactiva)
           const amountTop = `${isRecurring ? "" : (isIncome ? "+" : "-")}${formatCurrency(tx.amount, tx.currency)}`;
           const amountClass = isRecurring
             ? (isActive ? "text-gray-600" : "text-gray-400 line-through")
@@ -53,55 +46,52 @@ export default function TransactionList({ transactions, onDelete }) {
             <li
               key={tx.transactionId}
               onClick={() => setSelectedTransaction(tx)}
-              className="py-3 px-2 flex justify-between hover:bg-gray-100 cursor-pointer rounded"
+              className="rounded-lg md:rounded-none border md:border-0 bg-white md:bg-transparent p-3 md:px-2 hover:bg-gray-50 cursor-pointer"
             >
-              <div>
-                <div className="flex gap-2 items-center">
-                  <strong>{tx.description}</strong>
-                  {isRecurring && (
-                    <>
-                      <span title={t("recurring")}>🔁</span>
-                      <span className="text-[10px] uppercase bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
-                        {t("recurring")}
-                      </span>
-                      {!isActive && (
-                        <span className="text-[10px] uppercase bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
-                          {t("inactive", { defaultValue: "Inactive" })}
+              <div className="flex justify-between gap-3">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <strong className="truncate max-w-[60vw] sm:max-w-none">{tx.description}</strong>
+                    {isRecurring && (
+                      <>
+                        <span title={t("recurring")}>🔁</span>
+                        <span className="text-[10px] uppercase bg-gray-200 text-gray-700 px-2 py-0.5 rounded-full">
+                          {t("recurring")}
                         </span>
-                      )}
-                    </>
+                        {!isActive && (
+                          <span className="text-[10px] uppercase bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+                            {t("inactive", { defaultValue: "Inactive" })}
+                          </span>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <span className="text-sm text-gray-500">({categoryName})</span>
+                  {tx.tripName && (
+                    <div className="text-xs text-gray-500 italic mt-1">
+                      {t("associatedTripOptional")}: {tx.tripName}
+                    </div>
                   )}
                 </div>
-                <span className="text-sm text-gray-500">({categoryName})</span>
-                {tx.tripName && (
-                  <div className="text-xs text-gray-500 italic mt-1">
-                    {t("associatedTripOptional")}: {tx.tripName}
-                  </div>
-                )}
-              </div>
 
-              <div className="text-right">
-                <div className={`font-semibold ${amountClass}`}>{amountTop}</div>
-
-                {/* Si es recurrente, mostrar próxima ejecución o "Inactive" en el ÍTEM */}
-                {isRecurring && (
-                  <div className="text-xs text-gray-500">
-                    {isActive
-                      ? `${t("nextExecution")}: ${
-                          tx.nextExecution ? new Date(tx.nextExecution).toLocaleDateString() : "—"
-                        }`
-                      : t("inactive", { defaultValue: "Inactive" })}
-                  </div>
-                )}
-
-                {/* Conversión de moneda (gris e itálica para recurrentes también) */}
-                {tx.currency !== tx.convertedCurrency && tx.convertedAmount != null && (
-                  <div className={`text-xs italic ${isRecurring ? "text-gray-400" : "text-gray-500"}`}>
-                    ≈ {formatCurrency(tx.convertedAmount, tx.convertedCurrency)}
-                  </div>
-                )}
-
-                <div className="text-xs text-gray-500">{dateFormatted}</div>
+                <div className="text-right shrink-0">
+                  <div className={`font-semibold ${amountClass}`}>{amountTop}</div>
+                  {isRecurring && (
+                    <div className="text-xs text-gray-500">
+                      {isActive
+                        ? `${t("nextExecution")}: ${
+                            tx.nextExecution ? new Date(tx.nextExecution).toLocaleDateString() : "—"
+                          }`
+                        : t("inactive", { defaultValue: "Inactive" })}
+                    </div>
+                  )}
+                  {tx.currency !== tx.convertedCurrency && tx.convertedAmount != null && (
+                    <div className={`text-xs italic ${isRecurring ? "text-gray-400" : "text-gray-500"}`}>
+                      ≈ {formatCurrency(tx.convertedAmount, tx.convertedCurrency)}
+                    </div>
+                  )}
+                  <div className="text-xs text-gray-500">{dateFormatted}</div>
+                </div>
               </div>
             </li>
           );
@@ -109,7 +99,7 @@ export default function TransactionList({ transactions, onDelete }) {
       </ul>
 
       {selectedTransaction && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-md w-full shadow-lg relative">
             <button
               onClick={() => setSelectedTransaction(null)}
@@ -117,9 +107,7 @@ export default function TransactionList({ transactions, onDelete }) {
             >
               ✕
             </button>
-            <h2 className="text-xl font-bold mb-4">
-              {t("details", { defaultValue: "Transaction Details" })}
-            </h2>
+            <h2 className="text-xl font-bold mb-4">{t("details", { defaultValue: "Transaction Details" })}</h2>
             <div className="space-y-2 text-sm">
               <div><strong>{t("description")}:</strong> {selectedTransaction.description}</div>
               <div><strong>{t("amount")}:</strong> {formatCurrency(selectedTransaction.amount, selectedTransaction.currency)}</div>
@@ -132,30 +120,17 @@ export default function TransactionList({ transactions, onDelete }) {
               {(selectedTransaction.isRecurring ?? !!selectedTransaction.recurrencePattern) && (
                 <>
                   <hr className="my-2" />
-                  <div>
-                    <strong>{t("recurrencePattern")}:</strong>{" "}
-                    {t(selectedTransaction.recurrencePattern?.toLowerCase() || "recurring")}
-                  </div>
+                  <div><strong>{t("recurrencePattern")}:</strong> {t(selectedTransaction.recurrencePattern?.toLowerCase() || "recurring")}</div>
                   <div>
                     <strong>{t("nextExecution")}:</strong>{" "}
                     {selectedTransaction.active
-                      ? (selectedTransaction.nextExecution
-                          ? new Date(selectedTransaction.nextExecution).toLocaleDateString()
-                          : "—")
+                      ? (selectedTransaction.nextExecution ? new Date(selectedTransaction.nextExecution).toLocaleDateString() : "—")
                       : t("inactive", { defaultValue: "Inactive" })}
                   </div>
                   {selectedTransaction.recurrenceEndDate && (
-                    <div>
-                      <strong>{t("recurrenceEndDate")}:</strong>{" "}
-                      {new Date(selectedTransaction.recurrenceEndDate).toLocaleDateString()}
-                    </div>
+                    <div><strong>{t("recurrenceEndDate")}:</strong> {new Date(selectedTransaction.recurrenceEndDate).toLocaleDateString()}</div>
                   )}
-                  <div>
-                    <strong>{t("active")}:</strong>{" "}
-                    {selectedTransaction.active
-                      ? t("active")
-                      : t("inactive", { defaultValue: "Inactive" })}
-                  </div>
+                  <div><strong>{t("active")}:</strong> {selectedTransaction.active ? t("active") : t("inactive", { defaultValue: "Inactive" })}</div>
                 </>
               )}
             </div>

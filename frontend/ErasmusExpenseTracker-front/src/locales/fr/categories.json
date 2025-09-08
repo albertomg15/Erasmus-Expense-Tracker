@@ -1,0 +1,15 @@
+{
+  "label": "Catégorie",
+  "select": "Sélectionnez une catégorie",
+  "new": "+ Nouvelle catégorie",
+  "editCategory": "Modifier la catégorie",
+  "newCategory": "Nouvelle catégorie",
+  "chooseEmoji": "Choisissez un emoji",
+  "cancel": "Annuler",
+  "save": "Enregistrer",
+  "created": "Catégorie créée",
+  "updated": "Catégorie mise à jour",
+  "error": "Erreur lors de l'enregistrement de la catégorie",
+  "deleted": "Catégorie supprimée",
+  "cannotDelete": "Impossible de supprimer : cette catégorie est utilisée par des transactions existantes."
+}

@@ -1,0 +1,31 @@
+{
+  "loading": "Ładowanie danych...",
+  "error": "Błąd podczas pobierania danych",
+  "countryAveragesTitle": "Średnie wydatki w kraju",
+  "countryAveragesDescription": "Wykres pokazuje średni miesięczny wydatek w podziale na kategorie w Twoim kraju, na podstawie anonimowych danych użytkowników.",
+  "countryAverage": "Średnia krajowa",
+  "userAverage": "Twoja średnia",
+  "showIncompleteUserData": "Uwzględnij Twoje dane, nawet jeśli są niepełne",
+  "title": "Porównanie wydatków ze średnią krajową",
+  "user": "Ty",
+  "country": "Średnia krajowa",
+  "incompleteNotice": "Aby to porównanie było użyteczne, upewnij się, że dane za miesiąc są kompletne.",
+  "consentRequired": "Aby zobaczyć tę sekcję, włącz zgodę na przetwarzanie danych w profilu.",
+  "selectMonth": "Wybierz miesiąc",
+  "selectYear": "Wybierz rok",
+  "months": {
+    "1": "Styczeń",
+    "2": "Luty",
+    "3": "Marzec",
+    "4": "Kwiecień",
+    "5": "Maj",
+    "6": "Czerwiec",
+    "7": "Lipiec",
+    "8": "Sierpień",
+    "9": "Wrzesień",
+    "10": "Październik",
+    "11": "Listopad",
+    "12": "Grudzień"
+  },
+  "currencyNote": "Wszystkie kwoty są wyświetlane w: {{currency}}"
+}

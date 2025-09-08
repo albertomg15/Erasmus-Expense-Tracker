@@ -1,0 +1,14 @@
+{
+  "title": "Tauler de control",
+  "loading": "Carregant tauler...",
+  "currentBalance": "Saldo actual",
+  "spentThisMonth": "Gastat aquest mes",
+  "monthlyLimit": "Límit mensual",
+  "leftThisMonth": "restants aquest mes",
+  "setBudget": "Establir pressupost mensual",
+  "latestTransactions": "Últimes transaccions",
+  "addTransaction": "Afig transacció",
+  "noTransactions": "No s'han trobat transaccions aquest mes.",
+  "viewAll": "Veure totes les transaccions",
+  "uncategorized": "Sense categoria"
+}

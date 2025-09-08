@@ -1,0 +1,43 @@
+{
+  "title": "Estadístiques",
+  "loading": "Carregant estadístiques...",
+  "errorLoading": "No s'han pogut carregar les estadístiques.",
+  "budgetUsage": "Ús del pressupost",
+  "expensesByCategory": "Despeses per categoria",
+  "noCategoryData": "No hi ha dades de despeses per a aquest mes.",
+  "filters": {
+    "month": "Mes",
+    "year": "Any"
+  },
+  "tabs": {
+    "summary": "Resum",
+    "evolution": "Ingressos i despeses en el temps",
+    "categories": "Despeses per categoria",
+    "incomeVsExpense": "Ingressos vs Despeses",
+    "monthlyComparison": "Comparativa mensual",
+    "tripSpending": "Despesa per viatge",
+    "annualSummary": "Resum anual"
+  },
+  "labels": {
+    "income": "Ingressos",
+    "expense": "Despeses",
+    "savings": "Estalvis",
+    "totalSpent": "Total gastat",
+    "year": "Any"
+  },
+  "errors": {
+    "invalidChartData": "Dades no vàlides per al gràfic de resum anual"
+  },
+  "stat": {
+    "income": "Ingressos",
+    "expense": "Despeses",
+    "balance": "Saldo"
+  },
+  "budget": {
+    "used": "Usat",
+    "total": "Total"
+  },
+  "legend": {
+    "allValuesInPreferredCurrencyWithCode": "Tots els valors es mostren en la teua moneda preferida ({{currency}})."
+  }
+}
